@@ -1,3 +1,5 @@
+English | **[中文](README.md)**
+
 # Taiwan Official Document Writing AI Skill
 
 Import this skill into your preferred AI tool to generate properly formatted Taiwanese government documents and formal correspondence. Just describe what you need — the AI handles formatting, terminology, and compliance automatically.
