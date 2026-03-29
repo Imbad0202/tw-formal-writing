@@ -191,6 +191,20 @@
   }
   .term-helper th { font-weight: 600; color: var(--muted); }
   .hidden { display: none !important; }
+  .qc-item {
+    display: flex; gap: 0.5rem; align-items: start;
+    padding: 0.5rem 0.6rem; border-radius: 6px; margin-bottom: 0.35rem;
+    font-size: 0.8rem; line-height: 1.45;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+  }
+  .qc-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  .qc-warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+  .qc-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+  .qc-pass { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+  .qc-icon { flex-shrink: 0; font-size: 0.9rem; margin-top: 0.1rem; }
+  .qc-text b { font-weight: 600; }
+  .qc-empty { color: var(--muted); font-size: 0.8rem; text-align: center; padding: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif; }
   .placeholder-text { color: #999; }
   .org-title { text-align: center; font-size: 20px; font-weight: bold; }
   footer {
@@ -394,6 +408,17 @@
     <div id="fullPreview" class="preview-content hidden"></div>
     <div id="fullCopyArea" class="hidden" style="margin-top:0.5rem; text-align:right;">
       <button class="btn btn-primary" onclick="copyFullText()">複製全文</button>
+    </div>
+
+    <!-- Quality Check Panel -->
+    <div id="qualityPanel" style="margin-top:1rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+        <h3 style="font-size:0.95rem; display:flex; align-items:center; gap:0.4rem;">
+          <span id="qualityIcon">--</span> 品質檢核
+        </h3>
+        <span id="qualityScore" style="font-size:0.8rem; color:var(--muted);"></span>
+      </div>
+      <div id="qualityResults"></div>
     </div>
   </div>
 </div>
@@ -737,6 +762,272 @@ function copyFullText() {
     setTimeout(function() { fb.classList.remove('show'); }, 2000);
   });
 }
+
+// === Quality Check Engine ===
+
+var DEPRECATED_TERMS = [
+  { pat: /為要/g, fix: '已廢除，用句號結束即可', src: '公文用語改革' },
+  { pat: /為荷/g, fix: '已廢除，用句號結束即可', src: '公文用語改革' },
+  { pat: /為禱/g, fix: '已廢除，用句號結束即可', src: '公文用語改革' },
+  { pat: /實感德便/g, fix: '屬贅詞，應刪除', src: '公文用語改革' },
+  { pat: /至紉公誼/g, fix: '屬贅詞，應刪除', src: '公文用語改革' },
+  { pat: /鑒核示遵/g, fix: '改用「請鑒核」', src: '文書處理手冊' },
+  { pat: /似屬可行/g, fix: '模稜詞句，應具體表態', src: '文書處理手冊第16點' },
+  { pat: /尚無不合/g, fix: '模稜詞句，應具體表態', src: '文書處理手冊第16點' },
+];
+
+var WRONG_CHARS = [
+  { pat: /台端/g, fix: '應用「臺端」', src: '行政院110.12.10解釋' },
+  { pat: /乙案/g, fix: '「乙」無實益，用中文數字「一案」', src: '院長信箱釋例' },
+  { pat: /乙份/g, fix: '「乙」無實益，用阿拉伯數字', src: '院長信箱釋例' },
+  { pat: /公佈/g, fix: '應用「公布」', src: '法律統一用字表' },
+  { pat: /徵收/g, fix: '', src: '' }, // skip, this is valid
+  { pat: /帳冊/g, fix: '', src: '' }, // skip
+];
+
+var LEGAL_CHARS = [
+  { wrong: '佈', right: '布', ctx: '公布、分布、頒布', src: '法律統一用字表' },
+  { wrong: '賬', right: '帳', ctx: '帳目、帳戶', src: '法律統一用字表' },
+  { wrong: '粘', right: '黏', ctx: '黏貼', src: '法律統一用字表' },
+];
+
+function getAllText() {
+  var fields = [];
+  if (currentCat === 'sign') {
+    fields.push(document.getElementById('signUnit').value);
+    fields.push(document.getElementById('signSubject').value);
+    document.getElementById('signExplainList').querySelectorAll('textarea').forEach(function(t) { fields.push(t.value); });
+    document.getElementById('signProposalList').querySelectorAll('textarea').forEach(function(t) { fields.push(t.value); });
+  } else if (currentCat === 'letter') {
+    fields.push(document.getElementById('letterOrg').value);
+    fields.push(document.getElementById('letterRecipient').value);
+    fields.push(document.getElementById('letterSubject').value);
+    document.getElementById('letterExplainList').querySelectorAll('textarea').forEach(function(t) { fields.push(t.value); });
+    document.getElementById('letterMethodList').querySelectorAll('textarea').forEach(function(t) { fields.push(t.value); });
+  } else if (currentCat === 'announce') {
+    fields.push(document.getElementById('annSubject').value);
+    fields.push(document.getElementById('annBasis').value);
+    document.getElementById('annItemsList').querySelectorAll('textarea').forEach(function(t) { fields.push(t.value); });
+  }
+  return fields.join('\n');
+}
+
+function runQualityCheck() {
+  var issues = [];
+  var allText = getAllText();
+  if (!allText.trim()) {
+    renderQualityResults(issues);
+    return;
+  }
+
+  // --- Structural checks ---
+  if (currentCat === 'sign' || currentCat === 'letter') {
+    var subjectEl = currentCat === 'sign' ? document.getElementById('signSubject') : document.getElementById('letterSubject');
+    var subject = subjectEl ? subjectEl.value : '';
+    // S1: Subject contains item numbers
+    if (/[一二三四五六七八九十]、/.test(subject)) {
+      issues.push({ level: 'error', msg: '<b>主旨含分項標號</b>：主旨應一段完成，不可分「一、二、三」項次。', src: '文書處理手冊第16點第3款' });
+    }
+  }
+
+  if (currentCat === 'sign') {
+    var subject = document.getElementById('signSubject').value;
+    // S2: Sign subject missing expectation words
+    if (subject.length > 5 && !/請核示|請鑒核|請鑒察|簽請|請核備|請鈞閱|請核閱/.test(subject)) {
+      issues.push({ level: 'warn', msg: '<b>主旨可能缺少期望語</b>：簽的主旨末端通常應有「請核示」「請鑒核」等期望語。', src: '文書處理手冊第16點' });
+    }
+  }
+
+  if (currentCat === 'letter') {
+    var dir = getRadio('letterDir');
+    var subject = document.getElementById('letterSubject').value;
+    // S3: Letter subject missing expectation words
+    if (subject.length > 5 && !/請查照|請鑒核|請核示|請照辦|希照辦|請鑒察|請惠予/.test(subject)) {
+      issues.push({ level: 'warn', msg: '<b>主旨可能缺少期望語</b>：函的主旨末端通常應有期望語（如請查照、請鑒核等）。', src: '文書處理手冊第16點' });
+    }
+    // S4: Upward letter uses 辦法 section
+    if (dir === 'up') {
+      var methods = getItems('letterMethodList');
+      if (methods.length > 0 && methods.some(function(m) { return m.text; })) {
+        issues.push({ level: 'error', msg: '<b>上行函不宜用「辦法」段</b>：對上級不宜使用「辦法」，應併入說明段。', src: '文書處理手冊第16點第3款' });
+      }
+    }
+    // S5: Direction-term mismatch in explanation
+    var explainTexts = [];
+    document.getElementById('letterExplainList').querySelectorAll('textarea').forEach(function(t) { explainTexts.push(t.value); });
+    var explainAll = explainTexts.join('\n');
+
+    if (dir === 'up') {
+      if (/據[^\s]{0,2}(部|局|府|署|院|會|處|所|中心)/.test(explainAll) && !/據.*下級|據.*所屬|據.*各區/.test(explainAll)) {
+        issues.push({ level: 'warn', msg: '<b>上行文引敘語宜用「奉」</b>：引述上級機關來文時應用「奉」而非「據」。', src: '公文撰作解析第四章' });
+      }
+      if (/依據[^\s]{0,2}(部|局|府|署|院|會).*函/.test(explainAll)) {
+        issues.push({ level: 'error', msg: '<b>上行文引述上級來文不可用「依據」</b>：應用「奉○○部○年○月○日○字第○號函辦理」。「依據」僅用於引用法規。', src: '公文撰作解析第四章' });
+      }
+    }
+
+    // S6: Upward letter uses 貴 instead of 鈞
+    if (dir === 'up' && /貴(部|院|府|局|署|會|處|委員會)/.test(allText)) {
+      issues.push({ level: 'error', msg: '<b>上行文稱謂語錯誤</b>：對有隸屬關係之上級機關應用「鈞」（鈞部、鈞院），不用「貴」。', src: '文書處理手冊第18點第3款' });
+    }
+
+    // S7: Concept expectation terms in explanation/method sections (should only be in subject)
+    if (/請查照|請核示|請鑒核/.test(explainAll)) {
+      issues.push({ level: 'warn', msg: '<b>概括性期望語出現在說明段</b>：「請查照」「請核示」等概括性期望語應僅列於主旨段，不應在說明段重複。', src: '院長信箱114.12.10釋例' });
+    }
+  }
+
+  if (currentCat === 'announce') {
+    var subject = document.getElementById('annSubject').value;
+    // S8: Announcement subject contains expectation words
+    if (/請查照|請照辦|請鑒核|請核示/.test(subject)) {
+      issues.push({ level: 'error', msg: '<b>公告主旨含期望語</b>：公告主旨末端不寫期望語。', src: '文書處理手冊第15點' });
+    }
+  }
+
+  // --- Sign-specific ---
+  if (currentCat === 'sign') {
+    var unit = document.getElementById('signUnit').value;
+    // S9: Sign location contains agency name
+    if (/(局|部|府|署|院|會|中心|委員會).*(科|處|室|組|課)/.test(unit)) {
+      issues.push({ level: 'warn', msg: '<b>簽於何處冠機關名</b>：內部簽只寫最末級單位名稱（如「○○科」），不冠機關名。', src: '公文撰作解析第三章' });
+    }
+  }
+
+  // --- Deprecated terms ---
+  DEPRECATED_TERMS.forEach(function(term) {
+    if (term.pat.test(allText)) {
+      term.pat.lastIndex = 0;
+      issues.push({ level: 'warn', msg: '<b>使用已廢除用語「' + allText.match(term.pat)[0] + '」</b>：' + term.fix + '。', src: term.src });
+    }
+  });
+
+  // --- Wrong characters ---
+  if (/台端/.test(allText)) {
+    issues.push({ level: 'warn', msg: '<b>「台端」應寫為「臺端」</b>：稱謂用語以正體字「臺」為原則。', src: '行政院110.12.10解釋' });
+  }
+  if (/乙案|乙份/.test(allText)) {
+    issues.push({ level: 'warn', msg: '<b>不使用「乙」字</b>：「乙案」「乙份」無實益，改用中文數字「一案」或阿拉伯數字。', src: '院長信箱釋例' });
+  }
+  if (/公佈/.test(allText)) {
+    issues.push({ level: 'warn', msg: '<b>「佈」應為「布」</b>：法律統一用字規定用「公布」。', src: '法律統一用字表' });
+  }
+  if (/[^人]粘[貼]/.test(allText)) {
+    issues.push({ level: 'warn', msg: '<b>「粘」應為「黏」</b>：法律統一用字規定用「黏貼」。', src: '法律統一用字表' });
+  }
+  // 旨在、旨揭 — 114.7.11 建議停止使用
+  if (/旨在|旨揭/.test(allText)) {
+    issues.push({ level: 'info', msg: '<b>「旨在」「旨揭」建議替代</b>：行政院114.7.11釋例建議停止使用，可改用其他替代用語。', src: '院長信箱114.7.11' });
+  }
+
+  // --- Number usage ---
+  if (/一份|二份|三份/.test(allText) && !/附件/.test(allText.split(/一份|二份|三份/)[0].slice(-5))) {
+    // Only flag if it's a quantity, not part of a name
+    if (/檢送.*[一二三]份|檢附.*[一二三]份|影本[一二三]份/.test(allText)) {
+      issues.push({ level: 'info', msg: '<b>數量宜用阿拉伯數字</b>：附件份數屬統計數字意義，如「影本1份」而非「影本一份」。', src: '公文書橫式書寫數字使用原則' });
+    }
+  }
+
+  renderQualityResults(issues);
+}
+
+function renderQualityResults(issues) {
+  var container = document.getElementById('qualityResults');
+  var icon = document.getElementById('qualityIcon');
+  var score = document.getElementById('qualityScore');
+
+  while (container.firstChild) { container.removeChild(container.firstChild); }
+
+  var allText = getAllText();
+  if (!allText.trim()) {
+    var empty = document.createElement('div');
+    empty.className = 'qc-empty';
+    empty.textContent = '填寫內容後將自動檢核';
+    container.appendChild(empty);
+    icon.textContent = '--';
+    score.textContent = '';
+    return;
+  }
+
+  var errors = issues.filter(function(i) { return i.level === 'error'; }).length;
+  var warns = issues.filter(function(i) { return i.level === 'warn'; }).length;
+  var infos = issues.filter(function(i) { return i.level === 'info'; }).length;
+
+  if (issues.length === 0) {
+    var pass = document.createElement('div');
+    pass.className = 'qc-item qc-pass';
+    var passIcon = document.createElement('span');
+    passIcon.className = 'qc-icon';
+    passIcon.textContent = '\u2714';
+    var passText = document.createElement('span');
+    passText.className = 'qc-text';
+    passText.textContent = '未發現問題，格式與用語符合規範。';
+    pass.appendChild(passIcon);
+    pass.appendChild(passText);
+    container.appendChild(pass);
+    icon.textContent = '\u2714';
+    icon.style.color = 'var(--success)';
+    score.textContent = '通過';
+    score.style.color = 'var(--success)';
+    return;
+  }
+
+  issues.forEach(function(issue) {
+    var item = document.createElement('div');
+    item.className = 'qc-item qc-' + issue.level;
+    var itemIcon = document.createElement('span');
+    itemIcon.className = 'qc-icon';
+    itemIcon.textContent = issue.level === 'error' ? '\u2716' : issue.level === 'warn' ? '\u26A0' : '\u2139';
+    var textSpan = document.createElement('span');
+    textSpan.className = 'qc-text';
+    var msgSpan = document.createElement('span');
+    // Use a helper to set the HTML-like content as text nodes + bold
+    var parts = issue.msg.split(/<\/?b>/);
+    for (var pi = 0; pi < parts.length; pi++) {
+      if (pi % 2 === 1) {
+        var bold = document.createElement('b');
+        bold.textContent = parts[pi];
+        msgSpan.appendChild(bold);
+      } else {
+        msgSpan.appendChild(document.createTextNode(parts[pi]));
+      }
+    }
+    if (issue.src) {
+      var srcSpan = document.createElement('span');
+      srcSpan.style.cssText = 'display:block; font-size:0.7rem; color:inherit; opacity:0.7; margin-top:0.15rem;';
+      srcSpan.textContent = '\u2014 ' + issue.src;
+      msgSpan.appendChild(srcSpan);
+    }
+    textSpan.appendChild(msgSpan);
+    item.appendChild(itemIcon);
+    item.appendChild(textSpan);
+    container.appendChild(item);
+  });
+
+  if (errors > 0) {
+    icon.textContent = '\u2716';
+    icon.style.color = 'var(--danger)';
+    score.textContent = errors + ' 個錯誤' + (warns > 0 ? '、' + warns + ' 個警告' : '');
+    score.style.color = 'var(--danger)';
+  } else if (warns > 0) {
+    icon.textContent = '\u26A0';
+    icon.style.color = 'var(--warn)';
+    score.textContent = warns + ' 個警告' + (infos > 0 ? '、' + infos + ' 個建議' : '');
+    score.style.color = 'var(--warn)';
+  } else {
+    icon.textContent = '\u2139';
+    icon.style.color = 'var(--accent)';
+    score.textContent = infos + ' 個建議';
+    score.style.color = 'var(--accent)';
+  }
+}
+
+// Hook quality check into updatePreview
+var _origUpdatePreview = updatePreview;
+updatePreview = function() {
+  _origUpdatePreview();
+  runQualityCheck();
+};
 
 // Init
 document.getElementById('signDate').valueAsDate = new Date();
