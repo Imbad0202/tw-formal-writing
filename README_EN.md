@@ -2,7 +2,30 @@ English | **[中文](README.md)**
 
 # Taiwan Official Document Writing AI Skill
 
-Import this skill into your preferred AI tool to generate properly formatted Taiwanese government documents and formal correspondence. Just describe what you need — the AI handles formatting, terminology, and compliance automatically.
+[![Version](https://img.shields.io/badge/version-v1.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
+
+## Why does formal document writing matter?
+
+In Taiwan, official documents follow strict rules governed by the *Official Document Format Act* and the *Document Processing Handbook*. Getting them wrong has real consequences.
+
+**For government employees:**
+- New civil servants receive minimal training — they learn by getting documents rejected and rewritten
+- Using the wrong honorific (鈞 vs 貴), citation verb (奉 vs 據), or closing phrase can be seen as disrespectful to superiors
+- Choosing the wrong processing method (先簽後稿 vs 簽稿併陳) means the entire workflow restarts
+- Abolished phrases still slip in, and supervisors send them back
+
+**For regular citizens and foreigners:**
+- You want to petition the government, apply for a permit, or file an appeal — but have no idea how to format it
+- You need to send a certified letter (存證信函) to your landlord but aren't sure about the legal phrasing
+- An administrative appeal (訴願書) has a strict 30-day legal deadline — if the format is rejected, you may miss it
+
+**What this Skill solves:**
+- Import it into your AI tool (ChatGPT, Claude, Gemini), describe your situation in plain language, and get a properly formatted document that follows all regulations
+- Correct terminology, format, and processing method are selected automatically
+- Built-in quality checks catch common mistakes before you submit
+- Already written a document? Paste it in and the AI will review and correct it
 
 ## Coverage
 
@@ -97,3 +120,20 @@ The AI communicates with you in English but generates all documents in formal Tr
 - "Official Document Format Act" (公文程式條例)
 - National Academy of Civil Service "Official Document Writing Guide" (公文撰作解析, December 2025 edition)
 - Official interpretations and rulings (文書處理相關釋例, updated to February 23, 2026)
+
+## Support This Project
+
+If this tool helped you:
+
+- Hit [Star](https://github.com/Imbad0202/tw-formal-writing) so more people can find it
+- Share with colleagues, classmates, or anyone who needs to write formal documents in Taiwan
+- [Buy Me a Coffee](https://buymeacoffee.com/crucify020v) to support ongoing development
+- Found a bug or have a suggestion? Open an [Issue](https://github.com/Imbad0202/tw-formal-writing/issues)
+
+## Author
+
+**Cheng-I Wu** — [GitHub](https://github.com/Imbad0202) | [Buy Me a Coffee](https://buymeacoffee.com/crucify020v)
+
+## License
+
+[MIT License](LICENSE) — free to use, modify, and share.
