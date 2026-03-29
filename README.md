@@ -89,6 +89,10 @@ cp -r tw-formal-writing/ ~/.claude/commands/tw-formal-writing/
 1. 前往 [Gemini](https://gemini.google.com) → Gems → 新建 Gem
 2. 將 `STANDALONE.md` 的全部內容貼入指示欄位（~20K 字，Gems 上限 ~30K 字，放得下）
 
+## 注意事項
+
+> **依[行政院及所屬機關（構）使用生成式 AI 參考指引](https://www.ey.gov.tw/Page/448DE008087A1971/40c1a925-121d-4b6b-8f40-7e9e1a5401f2)，機密文書應由承辦人親自撰寫，禁止使用生成式 AI 輔助。使用本工具時，請勿輸入涉及機密、個資或未經機關同意公開之資訊。**
+
 ## 使用範例
 
 貼入或上傳完成後，直接跟 AI 說：

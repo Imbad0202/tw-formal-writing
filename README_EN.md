@@ -90,6 +90,10 @@ cp -r tw-formal-writing/ ~/.claude/commands/tw-formal-writing/
 1. Go to [Gemini](https://gemini.google.com) → Gems → Create a new Gem
 2. Paste the entire contents of `STANDALONE.md` into the instructions field (~20K characters, within Gems' ~30K limit)
 
+## Important Notice
+
+> **Per the [Executive Yuan Guidelines on Generative AI Use by Government Agencies](https://www.ey.gov.tw/Page/448DE008087A1971/40c1a925-121d-4b6b-8f40-7e9e1a5401f2), classified documents must be written by the responsible officer and may not be produced using generative AI. Do not input any classified, personally identifiable, or otherwise restricted information into this tool.**
+
 ## Example Prompts
 
 After importing, just tell the AI what you need:
