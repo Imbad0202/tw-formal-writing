@@ -120,6 +120,45 @@
     opacity: 0; transition: opacity 0.3s;
   }
   .copy-feedback.show { opacity: 1; }
+  .segment {
+    position: relative; border: 1px solid transparent; border-radius: 6px;
+    padding: 0.5rem 0.75rem; margin-bottom: 0.25rem; transition: all 0.15s;
+  }
+  .segment:hover { background: #fafaf7; border-color: var(--border); }
+  .segment-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.15rem;
+  }
+  .segment-label {
+    font-size: 0.7rem; font-weight: 600; color: var(--accent);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .copy-seg-btn {
+    padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 4px;
+    background: white; cursor: pointer; font-size: 0.7rem; color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    transition: all 0.15s; opacity: 0;
+  }
+  .segment:hover .copy-seg-btn { opacity: 1; }
+  .copy-seg-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-seg-btn.copied { border-color: var(--success); color: var(--success); }
+  .segment-text {
+    white-space: pre-wrap; font-family: "標楷體", "DFKai-SB", "BiauKai", serif;
+    font-size: 15px; line-height: 2;
+  }
+  .segment-divider { border-top: 1px dashed var(--border); margin: 0.5rem 0; }
+  .mode-toggle {
+    display: flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+    font-size: 0.8rem; margin-right: auto;
+  }
+  .mode-toggle button {
+    padding: 0.3rem 0.75rem; border: none; background: white;
+    cursor: pointer; font-family: inherit; font-size: 0.8rem;
+    color: var(--muted); transition: all 0.15s;
+  }
+  .mode-toggle button.active { background: var(--accent); color: white; }
+  .mode-toggle button:not(:last-child) { border-right: 1px solid var(--border); }
   .preview-content {
     background: white; border: 2px solid var(--border);
     border-radius: var(--radius); padding: 2rem;
@@ -341,11 +380,21 @@
     <div class="preview-header">
       <h2><span class="step-badge">3</span> 預覽</h2>
       <div class="btn-group">
+        <div class="mode-toggle">
+          <button class="active" onclick="setMode('segment', this)">分段複製</button>
+          <button onclick="setMode('full', this)">全文複製</button>
+        </div>
         <span class="copy-feedback" id="copyFeedback">已複製!</span>
-        <button class="btn btn-primary" onclick="copyToClipboard()">複製全文</button>
       </div>
     </div>
-    <div class="preview-content" id="previewContent"></div>
+    <div class="info-box" id="modeHint" style="margin-bottom:0.75rem;">
+      公務員模式：滑鼠移到各段落上方，點擊「複製」即可分段貼入公文系統。
+    </div>
+    <div id="segmentPreview" class="preview-content" style="padding:1rem;"></div>
+    <div id="fullPreview" class="preview-content hidden"></div>
+    <div id="fullCopyArea" class="hidden" style="margin-top:0.5rem; text-align:right;">
+      <button class="btn btn-primary" onclick="copyFullText()">複製全文</button>
+    </div>
   </div>
 </div>
 
@@ -451,8 +500,23 @@ function updateLetterTerms() {
   document.getElementById('letterMethodGroup').classList.toggle('hidden', dir === 'up');
 }
 
-function buildPreviewText() {
-  var lines = [];
+var previewMode = 'segment';
+
+function setMode(mode, btn) {
+  previewMode = mode;
+  document.querySelectorAll('.mode-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('segmentPreview').classList.toggle('hidden', mode !== 'segment');
+  document.getElementById('fullPreview').classList.toggle('hidden', mode !== 'full');
+  document.getElementById('fullCopyArea').classList.toggle('hidden', mode !== 'full');
+  document.getElementById('modeHint').textContent = mode === 'segment'
+    ? '公務員模式：滑鼠移到各段落上方，點擊「複製」即可分段貼入公文系統。'
+    : '一般民眾模式：產出完整公文，一鍵複製全文。';
+  updatePreview();
+}
+
+function buildSegments() {
+  var segs = [];
 
   if (currentCat === 'sign') {
     var method = getRadio('signMethod');
@@ -462,18 +526,23 @@ function buildPreviewText() {
     var explains = getItems('signExplainList');
     var proposals = getItems('signProposalList');
 
-    if (method !== '只簽不稿') lines.push(method);
-    lines.push('簽\u3000' + date);
-    lines.push('\u3000\u3000於' + v(unit, '○○科'));
-    lines.push('');
-    lines.push('主旨：' + v(subject, '（案由＋目的＋期望，一段完成）'));
+    var headerLines = [];
+    if (method !== '只簽不稿') headerLines.push(method);
+    headerLines.push('簽\u3000' + date);
+    headerLines.push('\u3000\u3000於' + v(unit, '○○科'));
+    segs.push({ label: '前文', text: headerLines.join('\n') });
+
+    segs.push({ label: '主旨', text: v(subject, '（案由＋目的＋期望，一段完成）') });
+
     if (explains.length > 0) {
-      lines.push('說明：');
-      explains.forEach(function(item) { lines.push('\u3000' + item.num + '、' + item.text); });
+      var expLines = [];
+      explains.forEach(function(item) { expLines.push(item.num + '、' + item.text); });
+      segs.push({ label: '說明', text: expLines.join('\n') });
     }
     if (proposals.length > 0) {
-      lines.push('擬辦：');
-      proposals.forEach(function(item) { lines.push('\u3000' + item.num + '、' + item.text); });
+      var propLines = [];
+      proposals.forEach(function(item) { propLines.push(item.num + '、' + item.text); });
+      segs.push({ label: '擬辦', text: propLines.join('\n') });
     }
 
   } else if (currentCat === 'letter') {
@@ -491,38 +560,30 @@ function buildPreviewText() {
     var cc = document.getElementById('letterCc').value.trim();
     var signer = document.getElementById('letterSigner').value.trim();
 
-    lines.push(v(org, '○○機關') + '\u3000函');
-    lines.push('');
-    lines.push('機關地址：○○市○○區○○路○○號');
-    lines.push('承 辦 人：○○○');
-    lines.push('電\u3000\u3000話：（02）0000-0000');
-    lines.push('電子信箱：○○○@mail.gov.tw');
-    lines.push('');
-    lines.push('受文者：' + v(recipient, '○○○○○'));
-    lines.push('');
-    lines.push('發文日期：' + date);
-    lines.push('發文字號：' + v(docNum, '○○○字第00000000000號'));
-    lines.push('速別：' + (speed || '普通件'));
-    lines.push('密等及解密條件或保密期限：');
-    lines.push('附件：' + (attach || ''));
-    lines.push('');
-    lines.push('主旨：' + v(subject, '（案由＋目的＋期望，一段完成）'));
+    segs.push({ label: '受文者', text: v(recipient, '○○○○○') });
+    segs.push({ label: '發文日期', text: date });
+    segs.push({ label: '發文字號', text: v(docNum, '○○○字第00000000000號') });
+    segs.push({ label: '速別', text: speed || '普通件' });
+    if (attach) segs.push({ label: '附件', text: attach });
+
+    segs.push({ label: '主旨', text: v(subject, '（案由＋目的＋期望，一段完成）') });
+
     if (explains.length > 0) {
-      lines.push('說明：');
-      explains.forEach(function(item) { lines.push('\u3000' + item.num + '、' + item.text); });
+      var expLines = [];
+      explains.forEach(function(item) { expLines.push(item.num + '、' + item.text); });
+      segs.push({ label: '說明', text: expLines.join('\n') });
     }
     if (methods.length > 0) {
       var hasContent = methods.some(function(m) { return m.text; });
       if (hasContent) {
-        lines.push('辦法：');
-        methods.forEach(function(item) { if (item.text) lines.push('\u3000' + item.num + '、' + item.text); });
+        var methLines = [];
+        methods.forEach(function(item) { if (item.text) methLines.push(item.num + '、' + item.text); });
+        segs.push({ label: '辦法', text: methLines.join('\n') });
       }
     }
-    lines.push('');
-    lines.push('正本：' + v(to || recipient, '○○○○○'));
-    if (cc) lines.push('副本：' + cc);
-    lines.push('');
-    lines.push(v(signer, '○○長\u3000○○○'));
+
+    segs.push({ label: '正本', text: v(to || recipient, '○○○○○') });
+    if (cc) segs.push({ label: '副本', text: cc });
 
   } else if (currentCat === 'announce') {
     var org = document.getElementById('annOrg').value.trim();
@@ -533,35 +594,143 @@ function buildPreviewText() {
     var items = getItems('annItemsList');
     var signer = document.getElementById('annSigner').value.trim();
 
-    lines.push(v(org, '○○機關') + '\u3000公告');
-    lines.push('');
-    lines.push('發文日期：' + date);
-    lines.push('發文字號：' + v(docNum, '○○○字第00000000000號'));
-    lines.push('');
-    lines.push('主旨：' + v(subject, '（扼要敘述目的和要求，不寫期望語）'));
-    if (basis) lines.push('依據：' + basis);
+    segs.push({ label: '發文日期', text: date });
+    segs.push({ label: '發文字號', text: v(docNum, '○○○字第00000000000號') });
+    segs.push({ label: '主旨', text: v(subject, '（扼要敘述目的和要求，不寫期望語）') });
+    if (basis) segs.push({ label: '依據', text: basis });
     if (items.length > 0) {
-      lines.push('公告事項：');
-      items.forEach(function(item) { lines.push('\u3000' + item.num + '、' + item.text); });
+      var itemLines = [];
+      items.forEach(function(item) { itemLines.push(item.num + '、' + item.text); });
+      segs.push({ label: '公告事項', text: itemLines.join('\n') });
     }
-    lines.push('');
-    lines.push(v(signer, '○○長\u3000○○○'));
-
-  } else if (currentCat === 'shuhan') {
-    lines.push('書函格式與「函」相同，請切換至「函」填寫。');
   }
 
+  return segs;
+}
+
+function buildFullText(segs) {
+  var lines = [];
+  if (currentCat === 'sign') {
+    segs.forEach(function(seg) {
+      if (seg.label === '前文') { lines.push(seg.text); lines.push(''); }
+      else if (seg.label === '主旨') { lines.push('主旨：' + seg.text); }
+      else if (seg.label === '說明') { lines.push('說明：'); seg.text.split('\n').forEach(function(l) { lines.push('\u3000' + l); }); }
+      else if (seg.label === '擬辦') { lines.push('擬辦：'); seg.text.split('\n').forEach(function(l) { lines.push('\u3000' + l); }); }
+    });
+  } else if (currentCat === 'letter') {
+    var org = document.getElementById('letterOrg').value.trim();
+    var signer = document.getElementById('letterSigner').value.trim();
+    lines.push(v(org, '○○機關') + '\u3000函');
+    lines.push('');
+    lines.push('機關地址：○○市○○區○○路○○號');
+    lines.push('承 辦 人：○○○');
+    lines.push('電\u3000\u3000話：（02）0000-0000');
+    lines.push('電子信箱：○○○@mail.gov.tw');
+    lines.push('');
+    segs.forEach(function(seg) {
+      if (seg.label === '受文者') lines.push('受文者：' + seg.text);
+      else if (seg.label === '發文日期') lines.push('發文日期：' + seg.text);
+      else if (seg.label === '發文字號') lines.push('發文字號：' + seg.text);
+      else if (seg.label === '速別') lines.push('速別：' + seg.text);
+      else if (seg.label === '附件') lines.push('附件：' + seg.text);
+      else if (seg.label === '主旨') { lines.push(''); lines.push('主旨：' + seg.text); }
+      else if (seg.label === '說明') { lines.push('說明：'); seg.text.split('\n').forEach(function(l) { lines.push('\u3000' + l); }); }
+      else if (seg.label === '辦法') { lines.push('辦法：'); seg.text.split('\n').forEach(function(l) { lines.push('\u3000' + l); }); }
+      else if (seg.label === '正本') { lines.push(''); lines.push('正本：' + seg.text); }
+      else if (seg.label === '副本') lines.push('副本：' + seg.text);
+    });
+    lines.push('');
+    lines.push(v(signer, '○○長\u3000○○○'));
+  } else if (currentCat === 'announce') {
+    var org = document.getElementById('annOrg').value.trim();
+    var signer = document.getElementById('annSigner').value.trim();
+    lines.push(v(org, '○○機關') + '\u3000公告');
+    lines.push('');
+    segs.forEach(function(seg) {
+      if (seg.label === '發文日期') lines.push('發文日期：' + seg.text);
+      else if (seg.label === '發文字號') lines.push('發文字號：' + seg.text);
+      else if (seg.label === '主旨') { lines.push(''); lines.push('主旨：' + seg.text); }
+      else if (seg.label === '依據') lines.push('依據：' + seg.text);
+      else if (seg.label === '公告事項') { lines.push('公告事項：'); seg.text.split('\n').forEach(function(l) { lines.push('\u3000' + l); }); }
+    });
+    lines.push('');
+    lines.push(v(signer, '○○長\u3000○○○'));
+  }
   return lines.join('\n');
 }
 
-function updatePreview() {
-  var content = buildPreviewText();
-  var el = document.getElementById('previewContent');
-  el.textContent = content;
+function copySegment(btn, text) {
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = '已複製';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = '複製';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
 }
 
-function copyToClipboard() {
-  var text = document.getElementById('previewContent').textContent;
+function renderSegmentPreview(segs) {
+  var container = document.getElementById('segmentPreview');
+  // Clear existing content
+  while (container.firstChild) { container.removeChild(container.firstChild); }
+
+  if (segs.length === 0) {
+    var emptyDiv = document.createElement('div');
+    emptyDiv.className = 'preview-empty';
+    emptyDiv.textContent = '請在左側填寫公文內容';
+    container.appendChild(emptyDiv);
+    return;
+  }
+
+  segs.forEach(function(seg, i) {
+    var segDiv = document.createElement('div');
+    segDiv.className = 'segment';
+
+    var header = document.createElement('div');
+    header.className = 'segment-header';
+
+    var label = document.createElement('span');
+    label.className = 'segment-label';
+    label.textContent = seg.label;
+
+    var copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-seg-btn';
+    copyBtn.textContent = '複製';
+    copyBtn.addEventListener('click', function() { copySegment(this, seg.text); });
+
+    header.appendChild(label);
+    header.appendChild(copyBtn);
+
+    var textDiv = document.createElement('div');
+    textDiv.className = 'segment-text';
+    textDiv.textContent = seg.text;
+
+    segDiv.appendChild(header);
+    segDiv.appendChild(textDiv);
+    container.appendChild(segDiv);
+
+    if (i < segs.length - 1) {
+      var divider = document.createElement('div');
+      divider.className = 'segment-divider';
+      container.appendChild(divider);
+    }
+  });
+}
+
+function updatePreview() {
+  var segs = buildSegments();
+
+  // Segment mode
+  renderSegmentPreview(segs);
+
+  // Full text mode
+  var fullText = buildFullText(segs);
+  document.getElementById('fullPreview').textContent = fullText;
+}
+
+function copyFullText() {
+  var text = document.getElementById('fullPreview').textContent;
   navigator.clipboard.writeText(text).then(function() {
     var fb = document.getElementById('copyFeedback');
     fb.classList.add('show');
