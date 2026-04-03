@@ -41,7 +41,7 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | File | Size | Use Case |
 |------|------|----------|
 | `LITE.md` | ~2K Chinese characters | ChatGPT GPTs Instructions (size-limited fields) |
-| `STANDALONE.md` | ~20K Chinese characters | File upload (full version with quality checks) |
+| `STANDALONE.md` | ~26K characters | File upload (full version with quality checks) |
 | `SKILL.md` + `references/` | Multi-file | Tools that support multi-file skills (Claude Code, etc.) |
 
 ## Setup Instructions
@@ -78,17 +78,19 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 ### Claude Code
 
 ```bash
-# Method A: Copy to commands directory
-cp -r tw-formal-writing/ ~/.claude/commands/tw-formal-writing/
+# Method A: Global install (available in all projects)
+mkdir -p ~/.claude/skills
+git clone https://github.com/Imbad0202/tw-formal-writing.git ~/.claude/skills/tw-formal-writing
 
-# Method B: Use in a project
-# Place SKILL.md and references/ under .claude/ in your project root
+# Method B: Project-level install
+mkdir -p .claude/skills
+git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-formal-writing
 ```
 
 ### Gemini Gems
 
 1. Go to [Gemini](https://gemini.google.com) → Gems → Create a new Gem
-2. Paste the entire contents of `STANDALONE.md` into the instructions field (~20K characters, within Gems' ~30K limit)
+2. Paste the entire contents of `STANDALONE.md` into the instructions field (~26K characters, approaching Gems' ~30K limit)
 
 ## Important Notice
 

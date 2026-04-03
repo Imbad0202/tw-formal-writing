@@ -41,7 +41,7 @@
 | 檔案 | 大小 | 適用場景 |
 |-----|-----|--------|
 | `LITE.md` | ~2K 中文字 | ChatGPT GPTs Instructions（有字數限制） |
-| `STANDALONE.md` | ~20K 中文字 | 檔案上傳（完整版，含品質檢核） |
+| `STANDALONE.md` | ~26K 字元 | 檔案上傳（完整版，含品質檢核） |
 | `SKILL.md` + `references/` | 多檔案 | Claude Code 等支援多檔案的工具 |
 
 ## 匯入方式
@@ -77,17 +77,19 @@
 ### Claude Code
 
 ```bash
-# 方法 A：複製到 commands 目錄
-cp -r tw-formal-writing/ ~/.claude/commands/tw-formal-writing/
+# 方法 A：全域安裝（所有專案可用）
+mkdir -p ~/.claude/skills
+git clone https://github.com/Imbad0202/tw-formal-writing.git ~/.claude/skills/tw-formal-writing
 
-# 方法 B：在專案中使用
-# 將 SKILL.md 和 references/ 放在專案根目錄的 .claude/ 下
+# 方法 B：專案內安裝
+mkdir -p .claude/skills
+git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-formal-writing
 ```
 
 ### Gemini Gems
 
 1. 前往 [Gemini](https://gemini.google.com) → Gems → 新建 Gem
-2. 將 `STANDALONE.md` 的全部內容貼入指示欄位（~20K 字，Gems 上限 ~30K 字，放得下）
+2. 將 `STANDALONE.md` 的全部內容貼入指示欄位（~26K 字元，Gems 上限 ~30K 字元，放得下但接近上限）
 
 ## 注意事項
 
