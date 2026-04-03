@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.1.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
