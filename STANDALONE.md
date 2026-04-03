@@ -21,6 +21,10 @@ description: >
   - 私人書信、感謝卡
   - 翻譯任務
   - 純粹的文章潤飾或改寫
+metadata:
+  version: 1.1.0
+  last_updated: 2026-04-03
+  status: active
 ---
 
 # 台灣正式文件撰寫助手

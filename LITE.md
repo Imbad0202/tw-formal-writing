@@ -3,6 +3,10 @@ name: tw-formal-writing-lite
 description: >
   台灣正式文件撰寫助手（精簡版）— 適用於 ChatGPT GPTs Instructions 欄位。
   涵蓋政府公文、政府非公文文件、法律文件、人民對政府文書的撰寫規範。
+metadata:
+  version: 1.1.0
+  last_updated: 2026-04-03
+  status: active
 ---
 
 > **精簡版：適用於 ChatGPT GPTs Instructions。完整版請使用 STANDALONE.md（上傳至 Knowledge）。**
