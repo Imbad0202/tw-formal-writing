@@ -94,7 +94,7 @@ git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-f
 
 ## Important Notice
 
-> **Per the [Executive Yuan Guidelines on Generative AI Use by Government Agencies](https://www.ey.gov.tw/Page/448DE008087A1971/40c1a925-121d-4b6b-8f40-7e9e1a5401f2), classified documents must be written by the responsible officer and may not be produced using generative AI. Do not input any classified, personally identifiable, or otherwise restricted information into this tool.**
+> **Per the [Executive Yuan Guidelines on Generative AI Use by Government Agencies](https://www.ey.gov.tw/Page/448DE008087A1971/40c1a925-121d-4b6b-8f40-7e9e1a5401f2), classified documents must be written by the responsible officer and may not be produced using generative AI. Do not input classified information, non-public restricted information, or unnecessary personal data into this tool. For citizen-to-government documents, provide only the minimum identifying and contact details required for that procedure; avoid national ID numbers, ID-card scans, or similar high-sensitivity data unless a law, agency form, or workflow explicitly requires them.**
 
 ## Example Prompts
 
@@ -126,6 +126,9 @@ The AI communicates with you in English but generates the formal document in Tra
 - "Official Document Format Act" (公文程式條例)
 - National Academy of Civil Service "Official Document Writing Guide" (公文撰作解析, December 2025 edition)
 - Official interpretations and rulings (文書處理相關釋例, updated to February 23, 2026)
+- Administrative Procedure Act (official text): https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030055
+- Administrative Appeal Act (official text): https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030020
+- Directions for Handling Public Petitions by Executive Yuan Agencies: https://theme.ndc.gov.tw/lawout/LawContent.aspx?id=GL000017
 
 ## Support This Project
 
