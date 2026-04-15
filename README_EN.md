@@ -106,7 +106,7 @@ After importing, just tell the AI what you need:
 - "How do I write a formal appeal (訴願書) against a traffic fine?"
 - "I need to write a formal application (申請書) for a street vendor permit"
 
-You can describe your situation in English — the AI will ask clarifying questions and generate the document in proper formal Chinese, following all Taiwanese government formatting rules. The output is ready to submit.
+You can describe your situation in English — the AI will ask clarifying questions and generate the formal document in proper Chinese, following Taiwanese formatting rules, plus a separate explanation/translation for your reference. Submit the Chinese formal document after checking whether the receiving agency requires a standard form or extra attachments.
 
 ## For Foreigners in Taiwan
 
@@ -118,7 +118,7 @@ If you're a foreigner living or working in Taiwan and need to write formal docum
 - **Filing an administrative appeal** (訴願) against a government decision
 - **Writing a formal application** (申請書) for various government services
 
-The AI communicates with you in English but generates all documents in formal Traditional Chinese, as required by Taiwanese regulations. Each document includes a paragraph-by-paragraph English translation so you understand what you're submitting.
+The AI communicates with you in English but generates the formal document in Traditional Chinese, as required by Taiwanese regulations. It can also provide a separate paragraph-by-paragraph English explanation so you understand what you're submitting, but that explanation should stay separate from the filing version.
 
 ## Regulatory Basis
 
