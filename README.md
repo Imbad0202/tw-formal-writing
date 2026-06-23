@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.1.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.2.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -41,8 +41,10 @@
 | 檔案 | 大小 | 適用場景 |
 |-----|-----|--------|
 | `LITE.md` | ~2K 中文字 | ChatGPT GPTs Instructions（有字數限制） |
-| `STANDALONE.md` | ~26K 字元 | 檔案上傳（完整版，含品質檢核） |
+| `STANDALONE.md` | ~28K 字元 | 檔案上傳（完整版，含品質檢核） |
 | `SKILL.md` + `references/` | 多檔案 | Claude Code 等支援多檔案的工具 |
+
+> **給貢獻者**：`references/` 是規範的單一真實來源。`STANDALONE.md` 由 `scripts/build.py` 自動生成，**請勿手動編輯**——改規範請改 `references/` 後跑 `python3 scripts/build.py` 重新生成。`LITE.md` 是手動維護的有損壓縮版，但 `scripts/check_consistency.py` 會檢查它沒漏掉關鍵規則錨點。CI 會 gate 這兩項。
 
 ## 匯入方式
 
