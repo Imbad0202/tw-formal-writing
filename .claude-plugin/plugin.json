@@ -1,0 +1,8 @@
+{
+  "name": "tw-formal-writing",
+  "description": "台灣正式文件撰寫助手 — 涵蓋政府公文、政府非公文文件、法律文件、人民對政府文書四類中文正式文件的撰寫。依使用者意圖自動判斷文件類別，載入對應撰寫規範與格式指引。",
+  "version": "1.2.2",
+  "license": "MIT",
+  "repository": "https://github.com/Imbad0202/tw-formal-writing",
+  "skills": "./skills/"
+}
