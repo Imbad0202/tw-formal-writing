@@ -43,6 +43,9 @@
 | `LITE.md` | ~2K 中文字 | ChatGPT GPTs Instructions（有字數限制） |
 | `STANDALONE.md` | ~28K 字元 | 檔案上傳（完整版，含品質檢核） |
 | `SKILL.md` + `references/` | 多檔案 | Claude Code 等支援多檔案的工具 |
+| `skill.zip`（[Releases](https://github.com/Imbad0202/tw-formal-writing/releases) 附件） | 打包 | claude.ai / cowork 等可上傳 skill 包者 |
+
+> **跨 vendor 入口**：根目錄的 `AGENTS.md` / `GEMINI.md`（指向 `STANDALONE.md` 完整單檔）供 Codex / Gemini 等 CLI 直接讀取；`.claude-plugin/plugin.json` 供 Claude Code 以 plugin 載入。一份內容、多種入口。
 
 > **給貢獻者**：`references/` 是規範的單一真實來源。`STANDALONE.md` 由 `scripts/build.py` 自動生成，**請勿手動編輯**——改規範請改 `references/` 後跑 `python3 scripts/build.py` 重新生成。`LITE.md` 是手動維護的有損壓縮版，但 `scripts/check_consistency.py` 會檢查它沒漏掉關鍵規則錨點。CI 會 gate 這兩項。
 
@@ -87,6 +90,19 @@ git clone https://github.com/Imbad0202/tw-formal-writing.git ~/.claude/skills/tw
 mkdir -p .claude/skills
 git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-formal-writing
 ```
+
+亦可作為 Claude Code plugin 載入（repo 含 `.claude-plugin/plugin.json`）。
+
+### claude.ai / cowork
+
+至 [Releases](https://github.com/Imbad0202/tw-formal-writing/releases) 下載 `tw-formal-writing-skill-vX.Y.Z.zip`，於 claude.ai 或 cowork 上傳載入。
+
+### Codex / Gemini 等 CLI
+
+```bash
+git clone https://github.com/Imbad0202/tw-formal-writing.git
+```
+clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ `GEMINI.md`（Gemini CLI）皆指向 `STANDALONE.md` 完整單檔，agent 會自動讀取。
 
 ### Gemini Gems
 
