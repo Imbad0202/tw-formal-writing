@@ -43,6 +43,9 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | `LITE.md` | ~2K Chinese characters | ChatGPT GPTs Instructions (size-limited fields) |
 | `STANDALONE.md` | ~26K characters | File upload (full version with quality checks) |
 | `SKILL.md` + `references/` | Multi-file | Tools that support multi-file skills (Claude Code, etc.) |
+| `skill.zip` ([Releases](https://github.com/Imbad0202/tw-formal-writing/releases) asset) | Packaged | Tools that accept a skill bundle upload (claude.ai / cowork) |
+
+> **Cross-vendor entries**: `AGENTS.md` / `GEMINI.md` at the repo root (pointing to the full single-file `STANDALONE.md`) are read directly by Codex / Gemini CLIs; `.claude-plugin/plugin.json` lets Claude Code load it as a plugin. One content source, multiple entries.
 
 ## Setup Instructions
 
@@ -86,6 +89,19 @@ git clone https://github.com/Imbad0202/tw-formal-writing.git ~/.claude/skills/tw
 mkdir -p .claude/skills
 git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-formal-writing
 ```
+
+Can also be loaded as a Claude Code plugin (the repo ships `.claude-plugin/plugin.json`).
+
+### claude.ai / cowork
+
+Download `tw-formal-writing-skill-vX.Y.Z.zip` from [Releases](https://github.com/Imbad0202/tw-formal-writing/releases) and upload it in claude.ai or cowork.
+
+### Codex / Gemini CLIs
+
+```bash
+git clone https://github.com/Imbad0202/tw-formal-writing.git
+```
+After cloning, it works in your working directory: `AGENTS.md` (Codex, etc.) and `GEMINI.md` (Gemini CLI) at the repo root both point to the full single-file `STANDALONE.md`, which the agent reads automatically.
 
 ### Gemini Gems
 
