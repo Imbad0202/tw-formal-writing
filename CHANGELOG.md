@@ -2,6 +2,12 @@
 
 本檔案記錄台灣正式文件撰寫 AI Skill 的版本歷史。
 
+## [1.2.2] - 2026-06-25
+
+### Added
+- **跨 vendor 通用入口**：新增 `AGENTS.md` / `GEMINI.md`（symlink 至 `STANDALONE.md` 完整單檔），供 Codex / Gemini 等其他 vendor 直接讀取；新增 `.claude-plugin/plugin.json` 供 Claude Code plugin 載入（`skills/` 指向 `SKILL.md`）。一份內容、多種入口：精簡版（SKILL.md，Claude 載 references）給支援 skill 格式者，完整單檔（STANDALONE.md）給其他 vendor。
+- **skill.zip 打包**：可下載 release 附件直接於 claude.ai / cowork 載入。
+
 ## [1.2.1] - 2026-06-23
 
 ### Changed
