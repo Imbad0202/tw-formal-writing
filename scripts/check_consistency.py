@@ -4,6 +4,7 @@
 1. STANDALONE.md 是否為 references/ 的最新 build 產物（呼叫 build.py --check）
 2. LITE.md 是否涵蓋關鍵規則錨點（LITE 是有損壓縮，不要求逐字一致，只查錨點不漏）
 3. SKILL / LITE / STANDALONE 三版 metadata.version 是否一致
+4. skill 包打包清單齊全（package.py 要打進 zip 的檔都在，避免誤刪 examples/ 或 LICENSE）
 
 用法: python3 scripts/check_consistency.py   # 任一不過 exit 1
 """
@@ -11,6 +12,9 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import package  # 複用 collect_files() 驗打包清單（單一真實來源，不重寫規則）
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -58,6 +62,20 @@ def check_lite_anchors() -> None:
         print(f"✓ LITE.md 涵蓋全部 {len(LITE_ANCHORS)} 個關鍵錨點")
 
 
+def check_package_manifest() -> None:
+    """skill 包（package.py 打進 zip 的檔）清單齊全：SKILL / references / examples / LICENSE。
+
+    直接複用 package.collect_files()——同一份清單邏輯，package.py 若改打包內容，這裡自動跟上，
+    不會漂移。差別只在失敗處理：package 的 CLI 端 sys.exit，這裡收斂成 ERRORS 統一報告。
+    抓的是「誤刪整組」的情況（例如 examples/ 或 LICENSE 不見）。
+    """
+    _, errors = package.collect_files()
+    if errors:
+        ERRORS.append("skill 包打包清單缺檔: " + "、".join(errors))
+    else:
+        print("✓ skill 包打包清單齊全（SKILL / references / examples / LICENSE）")
+
+
 def check_versions() -> None:
     versions = {f: get_version(f) for f in ("SKILL.md", "LITE.md", "STANDALONE.md")}
     if None in versions.values():
@@ -72,6 +90,7 @@ def check_versions() -> None:
 def main() -> None:
     check_standalone_built()
     check_lite_anchors()
+    check_package_manifest()
     check_versions()
     if ERRORS:
         print("\nFAIL:")

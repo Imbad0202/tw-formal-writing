@@ -47,7 +47,7 @@
 
 > **跨 vendor 入口**：根目錄的 `AGENTS.md` / `GEMINI.md`（指向 `STANDALONE.md` 完整單檔）供 Codex / Gemini 等 CLI 直接讀取；`.claude-plugin/plugin.json` 供 Claude Code 以 plugin 載入。一份內容、多種入口。
 
-> **給貢獻者**：`references/` 是規範的單一真實來源。`STANDALONE.md` 由 `scripts/build.py` 自動生成，**請勿手動編輯**——改規範請改 `references/` 後跑 `python3 scripts/build.py` 重新生成。`LITE.md` 是手動維護的有損壓縮版，但 `scripts/check_consistency.py` 會檢查它沒漏掉關鍵規則錨點。CI 會 gate 這兩項。
+> **給貢獻者**：`references/` 是規範的單一真實來源。`STANDALONE.md` 由 `scripts/build.py` 自動生成，**請勿手動編輯**——改規範請改 `references/` 後跑 `python3 scripts/build.py` 重新生成。`LITE.md` 是手動維護的有損壓縮版，但 `scripts/check_consistency.py` 會檢查它沒漏掉關鍵規則錨點。發布用的 `skill.zip` 由 `python3 scripts/package.py` 以純 Python 打包（`SKILL.md` + `references/` + `examples/` + `LICENSE`，頂層資料夾 `tw-formal-writing/`）；`--check` 只驗清單不寫檔、`--release` 打包後自動建 GitHub Release。CI 會 gate 這幾項（含打包清單齊全）。
 
 ## 匯入方式
 
