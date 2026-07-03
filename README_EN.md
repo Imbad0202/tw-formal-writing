@@ -141,7 +141,8 @@ The AI communicates with you in English but generates the formal document in Tra
 - Executive Yuan "Document Processing Handbook" (文書處理手冊, revised June 8, 2023)
 - "Official Document Format Act" (公文程式條例)
 - National Academy of Civil Service "Official Document Writing Guide" (公文撰作解析, December 2025 edition)
-- Official interpretations and rulings (文書處理相關釋例, updated to February 23, 2026)
+- Official interpretations and rulings — Letters of Interpretation (文書處理相關釋例－函釋, updated to April 30, 2026)
+- Official interpretations and rulings — Premier's Mailbox (文書處理相關釋例－院長電子信箱, updated to June 30, 2026)
 - Administrative Procedure Act (official text): https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030055
 - Administrative Appeal Act (official text): https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030020
 - Directions for Handling Public Petitions by Executive Yuan Agencies: https://theme.ndc.gov.tw/lawout/LawContent.aspx?id=GL000017

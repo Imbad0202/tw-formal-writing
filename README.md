@@ -130,7 +130,8 @@ AI 會自動判斷文件類別、確認必要資訊、產出合規文件、執�
 - 行政院《文書處理手冊》（112 年 6 月 8 日修正）
 - 《公文程式條例》
 - 國家文官學院《公文撰作解析》（114 年 12 月編印）
-- 文書處理相關釋例（函釋、院長電子信箱，更新至 115.2.23）
+- 文書處理相關釋例－函釋（更新至 115.4.30）
+- 文書處理相關釋例－院長電子信箱（更新至 115.6.30）
 - 全國法規資料庫《行政程序法》：https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030055
 - 全國法規資料庫《訴願法》：https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030020
 - 國家發展委員會《行政院及所屬各機關處理人民陳情案件要點》：https://theme.ndc.gov.tw/lawout/LawContent.aspx?id=GL000017
