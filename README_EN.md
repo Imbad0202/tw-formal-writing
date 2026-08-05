@@ -36,6 +36,10 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | Legal Documents | Certified Letter (存證信函), Contract (合約書), Lawyer's Letter (律師函), MOU (備忘錄), Declaration (聲明書), Affidavit (切結書), Power of Attorney (委託書) |
 | Citizen-to-Government | Petition (陳情書), Application (申請書), Administrative Appeal (訴願書), Objection (異議書) |
 
+## What's New (v1.3.0)
+
+A batch reinforcement after line-by-line first-party verification against the full text of the Executive Yuan Document Processing Manual (2023 edition) and its two official interpretation compilations: three incorrect existing citations fixed (the no-honorific-spacing directive mislabeled, "依／依據" wrongly flagged as an error, "請核示" wrongly listed for upward letters), plus new rules on the 惠 particle, numbers/dates/times/amounts, letter-field conventions, the complete Legal Uniform Character Table, conjunctions 及／與／暨, quotation marks for regulation names, internal-memo quality, and punctuation. All citations are registered in `CITATIONS.md`. See the [CHANGELOG](CHANGELOG.md).
+
 ## Three Versions
 
 | File | Size | Use Case |
