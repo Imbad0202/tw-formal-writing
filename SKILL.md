@@ -22,7 +22,7 @@ description: >
   - 純粹的文章潤飾或改寫
 metadata:
   version: 1.3.0
-  last_updated: 2026-07-03
+  last_updated: 2026-08-05
   status: active
 ---
 
