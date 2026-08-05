@@ -22,7 +22,7 @@ description: >
   - 翻譯任務
   - 純粹的文章潤飾或改寫
 metadata:
-  version: 1.2.3
+  version: 1.3.0
   last_updated: 2026-07-03
   status: active
 ---
