@@ -50,8 +50,11 @@ def check_standalone_built() -> None:
         capture_output=True, text=True,
     )
     if r.returncode != 0:
+        # stdout 與 stderr 都要帶出來：build.py 若是拋例外死掉，訊息全在 stderr，
+        # 只印 stdout 會出現「產物過期」後面接「一切正常」的自相矛盾輸出。
+        detail = "\n".join(filter(None, [r.stdout.strip(), r.stderr.strip()]))
         ERRORS.append(
-            "生成產物過期，請跑 python3 scripts/build.py\n    " + r.stdout.strip().replace("\n", "\n    ")
+            "生成產物過期，請跑 python3 scripts/build.py\n    " + detail.replace("\n", "\n    ")
         )
     else:
         print("✓ 三項生成產物皆為最新（STANDALONE.md / skills/ / AGENTS.md·GEMINI.md）")
@@ -97,6 +100,20 @@ def check_versions() -> None:
         ERRORS.append(f"marketplace.json 沒有 name 為 {plugin.get('name')!r} 的 plugin entry")
         return
     versions["marketplace.json[tw-formal-writing]"] = entries[0].get("version")
+
+    # 同一個 plugin 在兩份 manifest 各有一份文案，安裝清單與 plugin 詳情顯示的
+    # 是不同來源。只 gate version 的話，描述與關鍵字會各自漂移而沒人發現。
+    # 先確認欄位都在，再比對。直接比兩個 .get() 的話，欄位在兩邊同時被改名或刪掉時
+    # 兩側都是 None、比起來相等，gate 會在欄位根本不存在的情況下發綠燈。
+    for field_a, field_b, obj_a, obj_b in (
+        ("description", "description", plugin, entries[0]),
+        ("keywords", "tags", plugin, entries[0]),
+    ):
+        if field_a not in obj_a or field_b not in obj_b:
+            ERRORS.append(f"manifest 缺欄位：plugin.json.{field_a} / "
+                          f"marketplace.json.plugins[].{field_b} 必須都存在")
+        elif obj_a[field_a] != obj_b[field_b]:
+            ERRORS.append(f"plugin.json 的 {field_a} 與 marketplace.json 的 {field_b} 不一致")
 
     if None in versions.values():
         ERRORS.append(f"有檔案讀不到 version: {versions}")

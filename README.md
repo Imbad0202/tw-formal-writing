@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.4.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.4.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,9 +36,11 @@
 | 法律文件 | 存證信函、合約書、律師函、備忘錄(MOU)、聲明書、切結書、委託書 |
 | 人民對政府 | 陳情書、申請書、訴願書、異議書 |
 
-## 最新版本亮點（v1.4.0）
+## 最新版本亮點（v1.4.1）
 
-本 repo 現在同時是一個 Claude Code plugin marketplace，可直接用 `/plugin marketplace add` 安裝（見下方「Claude Code」段），CLI 與桌面版皆適用。同時修正 plugin 模式下讀不到規範內容的問題，並移除 repo 內全部 symlink（Windows clone 會失效）。
+v1.4.1 修正了 v1.4.0 code review 與 security review 抓出的七項問題（README 的 plugin 更新指令不完整、build 腳本可能刪到 repo 外的目錄、單檔版殘留死連結等），不動規範內容，詳見 [CHANGELOG](CHANGELOG.md)。
+
+v1.4.0：本 repo 同時是一個 Claude Code plugin marketplace，可直接用 `/plugin marketplace add` 安裝（見下方「Claude Code」段），CLI 與桌面版皆適用。同時修正 plugin 模式下讀不到規範內容的問題，並移除 repo 內全部 symlink（Windows clone 會失效）。
 
 前一版（v1.3.0）為規範內容的批次補強：對照《文書處理手冊》112 年版全文與行政院兩份釋例彙編逐條第一方核對，修正三處既有錯誤依據，並補齊惠字用法、數字日期時間金額細則、行款欄位規則、法律統一用字表全表等。詳見 [CHANGELOG](CHANGELOG.md)。
 
@@ -96,7 +98,7 @@
 /plugin install tw-formal-writing@tw-formal-writing
 ```
 
-之後用 `/plugin` 進選單即可啟用、停用或更新。更新規範只要重跑 `/plugin marketplace update tw-formal-writing`。
+之後用 `/plugin` 進選單即可啟用或停用。要更新到新版規範需要兩步：先 `/plugin marketplace update tw-formal-writing` 刷新清單，再 `/plugin update tw-formal-writing` 換掉已安裝的內容——只做前者不會更新你手上的規範。
 
 **方法 B：手動 clone 成 skill**
 
