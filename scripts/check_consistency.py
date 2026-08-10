@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """一致性檢查（CI gate）。
 
-1. STANDALONE.md 是否為 references/ 的最新 build 產物（呼叫 build.py --check）
+1. 三項生成產物是否為最新（呼叫 build.py --check）：
+   STANDALONE.md / skills/tw-formal-writing/ / AGENTS.md·GEMINI.md
 2. LITE.md 是否涵蓋關鍵規則錨點（LITE 是有損壓縮，不要求逐字一致，只查錨點不漏）
-3. SKILL / LITE / STANDALONE 三版 metadata.version 是否一致
+3. 五處 version 是否一致（SKILL / LITE / STANDALONE / plugin.json / marketplace.json）
 4. skill 包打包清單齊全（package.py 要打進 zip 的檔都在，避免誤刪 examples/ 或 LICENSE）
 
 用法: python3 scripts/check_consistency.py   # 任一不過 exit 1
 """
+import json
 import re
 import subprocess
 import sys
@@ -48,9 +50,11 @@ def check_standalone_built() -> None:
         capture_output=True, text=True,
     )
     if r.returncode != 0:
-        ERRORS.append("STANDALONE.md 不是 references/ 的最新 build 產物。請跑 python3 scripts/build.py")
+        ERRORS.append(
+            "生成產物過期，請跑 python3 scripts/build.py\n    " + r.stdout.strip().replace("\n", "\n    ")
+        )
     else:
-        print("✓ STANDALONE.md 與 references/ 一致")
+        print("✓ 三項生成產物皆為最新（STANDALONE.md / skills/ / AGENTS.md·GEMINI.md）")
 
 
 def check_lite_anchors() -> None:
@@ -77,14 +81,30 @@ def check_package_manifest() -> None:
 
 
 def check_versions() -> None:
+    """五個 version 同步點：三份 markdown + plugin.json + marketplace.json 的 plugin entry。
+
+    後兩者是 Claude Code plugin / marketplace 安裝時顯示給使用者的版本號，跟內容版本
+    漂移的話，安裝者會拿到「掛著舊版號的新內容」。SKILL.md 是源頭。
+    """
     versions = {f: get_version(f) for f in ("SKILL.md", "LITE.md", "STANDALONE.md")}
+
+    plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    versions[".claude-plugin/plugin.json"] = plugin.get("version")
+
+    market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
+    entries = [p for p in market.get("plugins", []) if p.get("name") == plugin.get("name")]
+    if not entries:
+        ERRORS.append(f"marketplace.json 沒有 name 為 {plugin.get('name')!r} 的 plugin entry")
+        return
+    versions["marketplace.json[tw-formal-writing]"] = entries[0].get("version")
+
     if None in versions.values():
         ERRORS.append(f"有檔案讀不到 version: {versions}")
         return
     if len(set(versions.values())) != 1:
-        ERRORS.append(f"三版 version 不一致: {versions}")
+        ERRORS.append(f"五處 version 不一致: {versions}")
     else:
-        print(f"✓ 三版 version 一致: {next(iter(versions.values()))}")
+        print(f"✓ 五處 version 一致: {next(iter(versions.values()))}")
 
 
 def main() -> None:

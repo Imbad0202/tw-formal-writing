@@ -1,22 +1,39 @@
 #!/usr/bin/env python3
-"""從 source 檔組裝 STANDALONE.md。
+"""從 source 檔組裝 STANDALONE.md，並鏡射 plugin skill 目錄。
 
 Single source of truth:
 - frontmatter version 取自 SKILL.md
 - 頭部(類別判斷/把關/共通原則/互動流程)= references/_header.md
 - 五個附錄 = references/*.md(各自降級成「附錄N」標題)
 
-STANDALONE.md 是生成產物，不應手動編輯。改規範請改 references/。
-用法: python3 scripts/build.py        # 寫出 STANDALONE.md
+三項生成產物，都不應手動編輯，改規範請改 references/：
+- STANDALONE.md：單檔完整版(ChatGPT / Claude Project 上傳用)
+- skills/tw-formal-writing/：Claude Code plugin 的 skill 目錄，內容鏡射自
+  SKILL.md + references/ + examples/
+- AGENTS.md / GEMINI.md：Codex / Gemini CLI 的自動讀取入口，內容即 STANDALONE.md
+
+用法: python3 scripts/build.py        # 寫出全部三項生成產物
       python3 scripts/build.py --check # 只檢查是否與現檔一致(CI 用)，不一致則 exit 1
 """
 import re
+import shutil
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 REF = ROOT / "references"
+EXAMPLES = ROOT / "examples"
 OUT = ROOT / "STANDALONE.md"
+
+# Claude Code plugin 的 skill 目錄。官方規格要求 SKILL.md 與它引用的 references/、
+# examples/ 同層(見 plugin-dev/plugin-structure)，而 SSOT 在 repo 根目錄，故此處放
+# 實體複本而非 symlink——plugin 安裝走 git clone，Windows 預設不還原 symlink。
+PLUGIN_SKILL = ROOT / "skills" / "tw-formal-writing"
+
+# 其他 vendor 的自動讀取入口，內容即 STANDALONE.md。同樣是實體複本而非 symlink：
+# 這兩個檔是給人 clone repo 後直接用的，Windows 的 git 預設 core.symlinks=false，
+# 會把 symlink 還原成一行純文字路徑，agent 讀到的就不是規範了。
+VENDOR_ENTRIES = ["AGENTS.md", "GEMINI.md"]
 
 # 附錄順序：(reference 檔, 附錄編號中文)
 APPENDICES = [
@@ -100,17 +117,92 @@ def build() -> str:
     return "\n".join(parts).rstrip() + "\n"
 
 
+def plugin_skill_contents() -> dict[str, str]:
+    """plugin skill 目錄該有的內容：{目錄內相對路徑: 檔案內容}。
+
+    SKILL.md 執行期讀 `references/*.md`、並指引使用者看 `examples/`；plugin 載入時
+    這些相對路徑是相對於 skill 目錄解析，所以兩個目錄都要在。
+    """
+    files = {"SKILL.md": read(ROOT / "SKILL.md")}
+    for src_dir in (REF, EXAMPLES):
+        for f in sorted(src_dir.glob("*.md")):
+            files[f"{src_dir.name}/{f.name}"] = read(f)
+    return files
+
+
+def sync_plugin_skill(check: bool) -> bool:
+    """把 SSOT 鏡射進 skills/tw-formal-writing/。check 模式只比對，回傳是否一致。"""
+    want = plugin_skill_contents()
+
+    if check:
+        have = {
+            p.relative_to(PLUGIN_SKILL).as_posix(): read(p)
+            for p in PLUGIN_SKILL.rglob("*") if p.is_file()
+        } if PLUGIN_SKILL.is_dir() else {}
+        if have != want:
+            print("FAIL: skills/tw-formal-writing/ 與 SKILL.md / references/ / examples/ 不一致。"
+                  "請跑 python3 scripts/build.py 重新生成。")
+            return False
+        print(f"OK: skills/tw-formal-writing/ 與 source 一致（{len(want)} 檔）")
+        return True
+
+    # 整個重建：舊檔可能是 symlink（v1.2.2 的做法），直接寫入會穿透寫回 SSOT
+    if PLUGIN_SKILL.is_symlink():
+        PLUGIN_SKILL.unlink()
+    elif PLUGIN_SKILL.exists():
+        shutil.rmtree(PLUGIN_SKILL)
+    for rel, text in want.items():
+        dst = PLUGIN_SKILL / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(text, encoding="utf-8")
+    print(f"已生成 skills/tw-formal-writing/（{len(want)} 檔）")
+    return True
+
+
+def sync_vendor_entries(standalone: str, check: bool) -> bool:
+    """把 STANDALONE.md 的內容鏡射到 AGENTS.md / GEMINI.md。check 模式只比對。"""
+    stale = [f for f in VENDOR_ENTRIES
+             if not (ROOT / f).is_file() or read(ROOT / f) != standalone]
+
+    if check:
+        if stale:
+            print(f"FAIL: {' / '.join(stale)} 與 STANDALONE.md 不一致。"
+                  "請跑 python3 scripts/build.py 重新生成。")
+            return False
+        print(f"OK: {' / '.join(VENDOR_ENTRIES)} 與 STANDALONE.md 一致")
+        return True
+
+    for f in VENDOR_ENTRIES:
+        p = ROOT / f
+        # 舊版是 symlink 指向 STANDALONE.md，直接寫入會穿透覆蓋目標
+        if p.is_symlink():
+            p.unlink()
+        p.write_text(standalone, encoding="utf-8")
+    print(f"已生成 {' / '.join(VENDOR_ENTRIES)}")
+    return True
+
+
 def main() -> None:
     result = build()
     if "--check" in sys.argv:
         current = read(OUT) if OUT.exists() else ""
+        ok = True
         if current != result:
             print("FAIL: STANDALONE.md 與 references/ 不一致。請跑 python3 scripts/build.py 重新生成。")
+            ok = False
+        else:
+            print("OK: STANDALONE.md 與 source 一致")
+        if not sync_plugin_skill(check=True):
+            ok = False
+        if not sync_vendor_entries(result, check=True):
+            ok = False
+        if not ok:
             sys.exit(1)
-        print("OK: STANDALONE.md 與 source 一致")
     else:
         OUT.write_text(result, encoding="utf-8")
         print(f"已生成 STANDALONE.md（{len(result.splitlines())} 行）")
+        sync_plugin_skill(check=False)
+        sync_vendor_entries(result, check=False)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.3.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.4.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,9 +36,11 @@
 | 法律文件 | 存證信函、合約書、律師函、備忘錄(MOU)、聲明書、切結書、委託書 |
 | 人民對政府 | 陳情書、申請書、訴願書、異議書 |
 
-## 最新版本亮點（v1.3.0）
+## 最新版本亮點（v1.4.0）
 
-對照《文書處理手冊》112 年版全文與行政院兩份釋例彙編逐條第一方核對後的批次補強：修正三處既有錯誤依據（挪抬函誤標、「依／依據」誤判錯、「請核示」誤列上行函），新增惠字用法、數字日期時間金額細則、行款欄位規則、法律統一用字表全表、連接詞及／與／暨、法規名稱引號、簽辦品質與標點符號規範。全部引據登記於 `CITATIONS.md`。詳見 [CHANGELOG](CHANGELOG.md)。
+本 repo 現在同時是一個 Claude Code plugin marketplace，可直接用 `/plugin marketplace add` 安裝（見下方「Claude Code」段），CLI 與桌面版皆適用。同時修正 plugin 模式下讀不到規範內容的問題，並移除 repo 內全部 symlink（Windows clone 會失效）。
+
+前一版（v1.3.0）為規範內容的批次補強：對照《文書處理手冊》112 年版全文與行政院兩份釋例彙編逐條第一方核對，修正三處既有錯誤依據，並補齊惠字用法、數字日期時間金額細則、行款欄位規則、法律統一用字表全表等。詳見 [CHANGELOG](CHANGELOG.md)。
 
 ## 三個版本
 
@@ -49,9 +51,9 @@
 | `SKILL.md` + `references/` | 多檔案 | Claude Code 等支援多檔案的工具 |
 | `skill.zip`（[Releases](https://github.com/Imbad0202/tw-formal-writing/releases) 附件） | 打包 | claude.ai / cowork 等可上傳 skill 包者 |
 
-> **跨 vendor 入口**：根目錄的 `AGENTS.md` / `GEMINI.md`（指向 `STANDALONE.md` 完整單檔）供 Codex / Gemini 等 CLI 直接讀取；`.claude-plugin/plugin.json` 供 Claude Code 以 plugin 載入。一份內容、多種入口。
+> **跨 vendor 入口**：根目錄的 `AGENTS.md` / `GEMINI.md`（內容即 `STANDALONE.md` 完整單檔）供 Codex / Gemini 等 CLI 直接讀取；`.claude-plugin/` 下的 `plugin.json` 與 `marketplace.json` 讓本 repo 同時是 Claude Code plugin 與 plugin marketplace，可用 `/plugin marketplace add` 直接安裝。一份內容、多種入口。
 
-> **給貢獻者**：`references/` 是規範的單一真實來源。`STANDALONE.md` 由 `scripts/build.py` 自動生成，**請勿手動編輯**——改規範請改 `references/` 後跑 `python3 scripts/build.py` 重新生成。`LITE.md` 是手動維護的有損壓縮版，但 `scripts/check_consistency.py` 會檢查它沒漏掉關鍵規則錨點。發布用的 `skill.zip` 由 `python3 scripts/package.py` 以純 Python 打包（`SKILL.md` + `references/` + `examples/` + `LICENSE`，頂層資料夾 `tw-formal-writing/`）；`--check` 只驗清單不寫檔、`--release` 打包後自動建 GitHub Release。CI 會 gate 這幾項（含打包清單齊全）。
+> **給貢獻者**：`references/` 是規範的單一真實來源。`STANDALONE.md`、`skills/tw-formal-writing/`、`AGENTS.md` / `GEMINI.md` 皆由 `scripts/build.py` 自動生成，**請勿手動編輯**——改規範請改 `references/` 後跑 `python3 scripts/build.py` 重新生成。`LITE.md` 是手動維護的有損壓縮版，但 `scripts/check_consistency.py` 會檢查它沒漏掉關鍵規則錨點。發布用的 `skill.zip` 由 `python3 scripts/package.py` 以純 Python 打包（`SKILL.md` + `references/` + `examples/` + `LICENSE`，頂層資料夾 `tw-formal-writing/`）；`--check` 只驗清單不寫檔、`--release` 打包後自動建 GitHub Release。CI 會 gate 這幾項（含打包清單齊全）。
 
 ## 匯入方式
 
@@ -83,19 +85,30 @@
 2. 在 Project Knowledge 上傳 `STANDALONE.md`
 3. 在該 Project 中開始對話
 
-### Claude Code
+### Claude Code（含桌面版）
+
+**方法 A（推薦）：從 marketplace 安裝 plugin**
+
+本 repo 即是一個 Claude Code plugin marketplace。在 Claude Code（CLI 或桌面版）中執行：
+
+```
+/plugin marketplace add Imbad0202/tw-formal-writing
+/plugin install tw-formal-writing@tw-formal-writing
+```
+
+之後用 `/plugin` 進選單即可啟用、停用或更新。更新規範只要重跑 `/plugin marketplace update tw-formal-writing`。
+
+**方法 B：手動 clone 成 skill**
 
 ```bash
-# 方法 A：全域安裝（所有專案可用）
+# 全域安裝（所有專案可用）
 mkdir -p ~/.claude/skills
 git clone https://github.com/Imbad0202/tw-formal-writing.git ~/.claude/skills/tw-formal-writing
 
-# 方法 B：專案內安裝
+# 專案內安裝
 mkdir -p .claude/skills
 git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-formal-writing
 ```
-
-亦可作為 Claude Code plugin 載入（repo 含 `.claude-plugin/plugin.json`）。
 
 ### claude.ai / cowork
 
@@ -106,7 +119,7 @@ git clone https://github.com/Imbad0202/tw-formal-writing.git .claude/skills/tw-f
 ```bash
 git clone https://github.com/Imbad0202/tw-formal-writing.git
 ```
-clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ `GEMINI.md`（Gemini CLI）皆指向 `STANDALONE.md` 完整單檔，agent 會自動讀取。
+clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ `GEMINI.md`（Gemini CLI）內容即 `STANDALONE.md` 完整單檔，agent 會自動讀取。
 
 ### Gemini Gems
 
