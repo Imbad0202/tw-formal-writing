@@ -80,7 +80,7 @@ CI（`.github/workflows/consistency.yml`）在每個 PR 和 push to main 跑 `ch
 
 兩份 manifest 的 `description` 與 `keywords`／`tags` 也一併 gate（v1.4.1 起）——同一個 plugin 在兩處各有一份文案，安裝清單與 plugin 詳情讀的是不同來源，只 gate version 會讓文案各自漂移。
 
-> **`references/` 與 `examples/` 下不要放 symlink**：`build.py` 與 `package.py` 會跳過它們並印 WARN。這兩個目錄的內容會被鏡射進 git 追蹤的 `skills/`、以及公開 Release 的 zip，跟著連結走等於把本機任意檔案的內容推上 public repo。
+> **source 檔一律是 repo 內的實體檔**：`build.py` 的 `read()` 與 `package.py` 的 `collect_files()` 會要求 `SKILL.md`、`LICENSE`、`references/*.md`、`examples/*.md` 解析後仍落在 repo 內，否則直接中止。這些內容會被鏡射進 git 追蹤的 `skills/`、組進 `STANDALONE.md`（及 `AGENTS.md` / `GEMINI.md`）、打進公開 Release 的 zip，跟著 symlink 走等於把本機任意檔案的內容推上 public repo。注意檢查的是 `resolve()` 後的路徑而非末端是否為 symlink——`references/` 整個目錄被換掉時，底下每個檔的 `is_symlink()` 都是 `False`。
 
 另外 `README.md` / `README_EN.md` 的 version badge（`badge/version-vX.Y.Z`）也要對齊——CI 不 gate，發版時手動改。`CHANGELOG.md` 需有對應 `## [X.Y.Z]` entry。
 

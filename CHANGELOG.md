@@ -16,7 +16,10 @@
 - **`marketplace.json` 的 `$schema` 404**：該 URL 301 後 404，編輯器驗證等於沒作用（Claude Code 載入時本就忽略此欄）。移除。
 
 ### Added
-- **符號連結防護（縱深）**：`build.py` 的 `plugin_skill_contents()` 與 `package.py` 的 `collect_files()` 跳過 `references/` `examples/` 下的 symlink。原本兩者都會跟著連結走，一個指向 repo 外的 `.md` 就能把本機任意檔案內容帶進這個 public repo 的追蹤檔或公開 Release 的 zip。
+- **source 路徑限制在 repo 內**：`build.py` 的 `read()` 與 `package.py` 的 `collect_files()` 一律要求 source 檔 `resolve()` 後仍在 repo 內，否則中止（不是跳過——跳過會讓整類規範默默從 skill 包與發布 zip 消失，而所有 gate 仍綠）。涵蓋 `SKILL.md`、`LICENSE`、`references/*.md`、`examples/*.md`。
+
+  用 `resolve()` 而不是檢查末端是否為 symlink：後者只看路徑最後一段，`references/` 這個**目錄**被換成指向 repo 外的 symlink 時，底下每個 `.md` 的 `is_symlink()` 都是 `False`，完全擋不住。原本兩條路徑都會跟著連結走，一個 PR 就能把維護者本機任意檔案的內容帶進這個 public repo 的追蹤檔、單檔版（`STANDALONE.md` / `AGENTS.md` / `GEMINI.md`）以及公開 Release 的 zip。
+- **寫入目標同樣限制在 repo 內**：`skills/` 被換成指向 repo 外的 symlink 且外部尚無同名子目錄時，刪除分支不會進入，寫入迴圈會直接在 repo 外建目錄寫檔。改為在刪除與寫入之前都先驗證。
 - **manifest 文案漂移 gate**：`plugin.json` 與 `marketplace.json` 的 `description`、`keywords`／`tags` 納入一致性檢查（原本只 gate `version`，兩份文案已各自漂移）。
 
 ## [1.4.0] - 2026-08-10

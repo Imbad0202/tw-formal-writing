@@ -63,12 +63,19 @@ def collect_files() -> tuple[list[Path], list[str]]:
     errors: list[str] = []
     if not SKILL.exists():
         errors.append("找不到 SKILL.md")
-    # 跳過 symlink：zipfile 寫入時會跟著連結走，一個指向 repo 外的 .md 就能把
-    # 本機任意檔案的內容打進公開 Release 的 zip 裡。
-    refs = [f for f in sorted(REF.glob("*.md")) if not f.is_symlink()]
+    refs = sorted(REF.glob("*.md"))
+    examples = sorted(EXAMPLES.glob("*.md"))
+    # 每個要進 zip 的檔都必須解析在 repo 內，一律報錯、不靜默略過：zipfile.write 會
+    # 跟著 symlink 走，一個指向 repo 外的 .md（或一個被換掉的 references/ 目錄）
+    # 就能把本機任意檔案的內容打進公開 Release 的 zip；而略過又會讓整類規範默默從
+    # 發布包裡消失（清單仍非空、所有 gate 仍綠）。LICENSE / SKILL.md 也走同一道檢查。
+    escapes = [f for f in (SKILL, *refs, *examples, LICENSE)
+               if f.exists() and not build.within_repo(f)]
+    if escapes:
+        errors.append("source 檔解析後不在 repo 內（symlink？）: "
+                      + "、".join(str(f) for f in escapes))
     if not refs:
         errors.append("references/ 下沒有任何 .md，打包內容會不完整")
-    examples = [f for f in sorted(EXAMPLES.glob("*.md")) if not f.is_symlink()]
     if not examples:
         errors.append("examples/ 下沒有任何 .md，但 SKILL.md 指向該目錄，打包內容會不完整")
     if not LICENSE.exists():
