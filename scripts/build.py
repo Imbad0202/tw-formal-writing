@@ -77,11 +77,15 @@ metadata:
 
 WARNING = "<!-- 本檔由 scripts/build.py 從 references/ 自動生成，請勿手動編輯。改規範請改 references/ 後重新 build。 -->\n\n"
 
-# references 內的跨檔指涉 → STANDALONE 內的附錄指涉(讓單檔讀起來自然)
-CROSS_REF_FIXES = [
-    ("`official-letter.md`", "附錄一（政府公文撰寫規範）"),
-    ("更完整的用語對照表請參閱 `references/terminology-tables.md`。", "更完整的用語對照表請參閱附錄二（公文用語詳細對照表）。"),
-]
+# references 內的跨檔指涉 → STANDALONE 內的附錄指涉(讓單檔讀起來自然)。
+# 用 regex 涵蓋 `xxx.md` 與 `references/xxx.md` 兩種寫法：早期是逐句字面比對，
+# 新增的第二種句型就漏改、把死連結留在單檔版裡(v1.3.0 起殘留於 STANDALONE 780 行)。
+# 前後各吃掉一個可能的空格：原文的空格是給行內程式碼留的間隔，換成中文詞之後
+# 留著就變成中文字之間的贅空格。
+CROSS_REF_RE = re.compile(
+    r" ?`(?:references/)?(" + "|".join(re.escape(f) for f, _ in APPENDICES) + r")` ?"
+)
+APPENDIX_NUM = {fname: num for fname, num in APPENDICES}
 
 
 def read(p: Path) -> str:
@@ -110,11 +114,22 @@ def build() -> str:
         # 第一個 H1「# xxx規範」→「# 附錄N：xxx規範」
         body = re.sub(r"^# (.+)$", rf"# 附錄{num}：\1", body, count=1, flags=re.M)
         # 跨檔指涉 → 附錄指涉
-        for src, dst in CROSS_REF_FIXES:
-            body = body.replace(src, dst)
+        body = CROSS_REF_RE.sub(lambda m: f"附錄{APPENDIX_NUM[m.group(1)]}", body)
         parts.append("\n---\n\n" + body + "\n")
 
-    return "\n".join(parts).rstrip() + "\n"
+    result = "\n".join(parts).rstrip() + "\n"
+
+    # 收尾斷言：單檔版不該再有指向 references/ 的路徑，那對單檔使用者是死連結。
+    # WARNING 那行是 build 自己的註解，本來就會提到 references/，排除掉。
+    leftovers = [
+        line for line in result.splitlines()
+        if "references/" in line and line not in WARNING
+    ]
+    if leftovers:
+        sys.exit("ERROR: 生成內容仍殘留指向 references/ 的死連結：\n  "
+                 + "\n  ".join(leftovers))
+
+    return result
 
 
 def plugin_skill_contents() -> dict[str, str]:
@@ -126,6 +141,11 @@ def plugin_skill_contents() -> dict[str, str]:
     files = {"SKILL.md": read(ROOT / "SKILL.md")}
     for src_dir in (REF, EXAMPLES):
         for f in sorted(src_dir.glob("*.md")):
+            # 跳過 symlink：read() 會跟著連結走，一個指向 repo 外的 .md 就能把
+            # 本機任意檔案的內容搬進這個 public repo 的追蹤檔裡。
+            if f.is_symlink():
+                print(f"WARN: 跳過 symlink {f.relative_to(ROOT)}（不納入 skill 包）")
+                continue
             files[f"{src_dir.name}/{f.name}"] = read(f)
     return files
 
@@ -135,21 +155,41 @@ def sync_plugin_skill(check: bool) -> bool:
     want = plugin_skill_contents()
 
     if check:
-        have = {
-            p.relative_to(PLUGIN_SKILL).as_posix(): read(p)
+        # 先比檔名集合，再只讀「該有的檔」。不要無差別讀取目錄下每個檔——
+        # 一個 .DS_Store 之類的二進位雜檔就會讓 read() 丟 UnicodeDecodeError，
+        # CI 直接 traceback 死掉、且訊息完全指不到問題。
+        have_names = {
+            p.relative_to(PLUGIN_SKILL).as_posix()
             for p in PLUGIN_SKILL.rglob("*") if p.is_file()
-        } if PLUGIN_SKILL.is_dir() else {}
-        if have != want:
-            print("FAIL: skills/tw-formal-writing/ 與 SKILL.md / references/ / examples/ 不一致。"
+        } if PLUGIN_SKILL.is_dir() else set()
+        if have_names != set(want):
+            extra = sorted(have_names - set(want))
+            missing = sorted(set(want) - have_names)
+            detail = "；".join(filter(None, [
+                f"多出 {'、'.join(extra)}" if extra else "",
+                f"缺少 {'、'.join(missing)}" if missing else "",
+            ]))
+            print(f"FAIL: skills/tw-formal-writing/ 檔案清單不符（{detail}）。"
+                  "請跑 python3 scripts/build.py 重新生成。")
+            return False
+        stale = [rel for rel, text in want.items() if read(PLUGIN_SKILL / rel) != text]
+        if stale:
+            print(f"FAIL: skills/tw-formal-writing/ 內容過期（{'、'.join(stale)}）。"
                   "請跑 python3 scripts/build.py 重新生成。")
             return False
         print(f"OK: skills/tw-formal-writing/ 與 source 一致（{len(want)} 檔）")
         return True
 
-    # 整個重建：舊檔可能是 symlink（v1.2.2 的做法），直接寫入會穿透寫回 SSOT
+    # 整個重建前先確認刪的是 repo 內那個目錄。只驗末端是不是 symlink 不夠：
+    # 上層 skills/ 若被換成指向 repo 外的 symlink，rmtree 會順著走出去把外面的
+    # 目錄整個刪掉（PR 可以夾帶這種 symlink，維護者一跑 build.py 就中）。
     if PLUGIN_SKILL.is_symlink():
         PLUGIN_SKILL.unlink()
     elif PLUGIN_SKILL.exists():
+        resolved = PLUGIN_SKILL.resolve()
+        if resolved.parent != (ROOT / "skills").resolve() or ROOT.resolve() not in resolved.parents:
+            sys.exit(f"ERROR: {PLUGIN_SKILL.relative_to(ROOT)} 解析到 repo 外（{resolved}），"
+                     "拒絕刪除。請檢查 skills/ 是否被換成 symlink。")
         shutil.rmtree(PLUGIN_SKILL)
     for rel, text in want.items():
         dst = PLUGIN_SKILL / rel

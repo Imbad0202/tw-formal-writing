@@ -2,6 +2,23 @@
 
 本檔案記錄台灣正式文件撰寫 AI Skill 的版本歷史。
 
+## [1.4.1] - 2026-08-10
+
+修正 v1.4.0 的 `/code-review` 與 `/security-review` findings，全部經回歸測試驗證。不動規範內容。
+
+### Fixed
+- **README 的 plugin 更新指令不完整（中英）**：原寫「更新規範只要 `/plugin marketplace update`」，但那只刷新 marketplace 清單，不會換掉已安裝的內容——使用者會以為更新了卻仍在用舊版公文規範。補上必要的第二步 `/plugin update tw-formal-writing`。
+- **`build.py` 的 `shutil.rmtree` 可刪到 repo 外**：原本只驗末端 `skills/tw-formal-writing` 是否為 symlink，上層 `skills/` 被換成指向 repo 外的 symlink 時會順著走出去刪掉外部目錄（PR 可夾帶，維護者跑 `build.py` 即中；CI 的 `--check` 不受影響）。刪除前改為解析並確認仍在 repo 內。
+- **單檔版殘留死連結**：`CROSS_REF_FIXES` 逐句字面比對，新增句型漏改，`references/terminology-tables.md` 這類路徑留在 STANDALONE / AGENTS / GEMINI 裡，對單檔使用者是不存在的檔案。改為 regex 涵蓋 `` `xxx.md` `` 與 `` `references/xxx.md` `` 兩種寫法（一併去除替換後中文間的贅空格），並加收尾斷言：生成內容若仍殘留 `references/` 路徑就中止 build。
+- **一個 `.DS_Store` 就讓 CI 永久紅**：`--check` 原本無差別讀取 `skills/` 下每個檔並當 UTF-8 解，遇二進位雜檔直接 `UnicodeDecodeError`。改為先比檔名集合、再只讀該有的檔，並在訊息中列出多出／缺少哪些檔。`.gitignore` 補 `.DS_Store`。
+- **`check_consistency.py` 丟掉 stderr**：build.py 若拋例外，訊息全在 stderr，輸出會變成「產物過期」後面接「一切正常」的自相矛盾內容。改為 stdout + stderr 都帶出。
+- **`package.py` 的錯誤訊息過期**：v1.4.0 把 `build.py --check` 從驗一項擴為三項，但 `package.py` 仍寫死「STANDALONE.md 過期」且丟掉輸出，`skills/` 沒同步時會指向錯的檔案。改為轉述 build.py 自己的輸出（函式更名 `check_generated_artifacts`）。
+- **`marketplace.json` 的 `$schema` 404**：該 URL 301 後 404，編輯器驗證等於沒作用（Claude Code 載入時本就忽略此欄）。移除。
+
+### Added
+- **符號連結防護（縱深）**：`build.py` 的 `plugin_skill_contents()` 與 `package.py` 的 `collect_files()` 跳過 `references/` `examples/` 下的 symlink。原本兩者都會跟著連結走，一個指向 repo 外的 `.md` 就能把本機任意檔案內容帶進這個 public repo 的追蹤檔或公開 Release 的 zip。
+- **manifest 文案漂移 gate**：`plugin.json` 與 `marketplace.json` 的 `description`、`keywords`／`tags` 納入一致性檢查（原本只 gate `version`，兩份文案已各自漂移）。
+
 ## [1.4.0] - 2026-08-10
 
 ### Added

@@ -21,7 +21,7 @@ description: >
   - 翻譯任務
   - 純粹的文章潤飾或改寫
 metadata:
-  version: 1.4.0
+  version: 1.4.1
   last_updated: 2026-08-10
   status: active
 ---

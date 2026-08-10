@@ -78,6 +78,10 @@ CI（`.github/workflows/consistency.yml`）在每個 PR 和 push to main 跑 `ch
 - `.claude-plugin/plugin.json` 的 `version`
 - `.claude-plugin/marketplace.json` 中 `plugins[].version`（安裝時顯示給使用者的版本號）
 
+兩份 manifest 的 `description` 與 `keywords`／`tags` 也一併 gate（v1.4.1 起）——同一個 plugin 在兩處各有一份文案，安裝清單與 plugin 詳情讀的是不同來源，只 gate version 會讓文案各自漂移。
+
+> **`references/` 與 `examples/` 下不要放 symlink**：`build.py` 與 `package.py` 會跳過它們並印 WARN。這兩個目錄的內容會被鏡射進 git 追蹤的 `skills/`、以及公開 Release 的 zip，跟著連結走等於把本機任意檔案的內容推上 public repo。
+
 另外 `README.md` / `README_EN.md` 的 version badge（`badge/version-vX.Y.Z`）也要對齊——CI 不 gate，發版時手動改。`CHANGELOG.md` 需有對應 `## [X.Y.Z]` entry。
 
 ## Public repo 紀律（動任何內容前必讀）

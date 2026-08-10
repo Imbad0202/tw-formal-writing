@@ -63,10 +63,12 @@ def collect_files() -> tuple[list[Path], list[str]]:
     errors: list[str] = []
     if not SKILL.exists():
         errors.append("找不到 SKILL.md")
-    refs = sorted(REF.glob("*.md"))
+    # 跳過 symlink：zipfile 寫入時會跟著連結走，一個指向 repo 外的 .md 就能把
+    # 本機任意檔案的內容打進公開 Release 的 zip 裡。
+    refs = [f for f in sorted(REF.glob("*.md")) if not f.is_symlink()]
     if not refs:
         errors.append("references/ 下沒有任何 .md，打包內容會不完整")
-    examples = sorted(EXAMPLES.glob("*.md"))
+    examples = [f for f in sorted(EXAMPLES.glob("*.md")) if not f.is_symlink()]
     if not examples:
         errors.append("examples/ 下沒有任何 .md，但 SKILL.md 指向該目錄，打包內容會不完整")
     if not LICENSE.exists():
@@ -75,14 +77,20 @@ def collect_files() -> tuple[list[Path], list[str]]:
     return files, errors
 
 
-def check_standalone_built() -> None:
-    """確認 STANDALONE.md 是 references/ 的最新 build 產物，否則發布包可能含過期內容。"""
+def check_generated_artifacts() -> None:
+    """確認三項生成產物都是最新 build 產物，否則發布包可能含過期內容。
+
+    訊息一律轉述 build.py 自己的輸出（stdout + stderr），不要寫死是哪個產物過期——
+    build.py --check 驗的是 STANDALONE.md / skills/ / AGENTS.md·GEMINI.md 三項，
+    寫死訊息會把「skills/ 沒同步」誤報成「STANDALONE.md 過期」，指向錯的檔案。
+    """
     r = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "build.py"), "--check"],
         capture_output=True, text=True,
     )
     if r.returncode != 0:
-        sys.exit("ERROR: STANDALONE.md 不是 references/ 的最新 build 產物。請先跑 python3 scripts/build.py")
+        detail = "\n".join(filter(None, [r.stdout.strip(), r.stderr.strip()]))
+        sys.exit(f"ERROR: 生成產物過期，請先跑 python3 scripts/build.py\n{detail}")
 
 
 def arcname(f: Path) -> str:
@@ -133,7 +141,7 @@ def create_release(version: str, zip_path: Path) -> None:
 
 
 def main() -> None:
-    check_standalone_built()
+    check_generated_artifacts()
     version = get_version()
     files, errors = collect_files()
     if errors:
