@@ -2,6 +2,21 @@
 
 本檔案記錄台灣正式文件撰寫 AI Skill 的版本歷史。
 
+## [1.4.0] - 2026-08-10
+
+### Added
+- **Claude Code plugin marketplace**：新增 `.claude-plugin/marketplace.json`，本 repo 自身即為 marketplace。使用者於 Claude Code（CLI 或桌面版）執行 `/plugin marketplace add Imbad0202/tw-formal-writing` 後 `/plugin install tw-formal-writing@tw-formal-writing` 即可安裝，並以 `/plugin` 選單啟用停用、`/plugin marketplace update` 更新規範。README 中英同步補安裝說明。
+- **`plugin.json` metadata 補完**：新增 `author` / `homepage` / `keywords`，供 marketplace 清單顯示。
+
+### Fixed
+- **plugin 模式讀不到規範內容**：`skills/tw-formal-writing/` 原本只有一個指向根目錄 `SKILL.md` 的 symlink，未含 `references/` 與 `examples/`。依 Claude Code plugin 規格，SKILL.md 內的相對路徑是相對 skill 目錄解析，故 plugin 載入後四類文件的撰寫規範全數讀取失敗。改由 `scripts/build.py` 將 `SKILL.md` + `references/` + `examples/` 鏡射為實體檔（不用 symlink——plugin 安裝走 git clone，Windows 預設不還原 symlink）。
+
+- **`AGENTS.md` / `GEMINI.md` 改為實體檔**：原為指向 `STANDALONE.md` 的 symlink，Windows 的 git 預設 `core.symlinks=false`，clone 後會還原成一行純文字路徑，Codex / Gemini CLI 讀到的不是規範。改由 `build.py` 生成實體複本，`--check` 一併 gate。至此全 repo 無 symlink。
+
+### Changed
+- **`scripts/build.py`**：除 `STANDALONE.md` 外，一併生成 `skills/tw-formal-writing/` 與 `AGENTS.md` / `GEMINI.md`；`--check` 三者皆驗。
+- **`scripts/check_consistency.py`**：version 一致性由三處擴為五處，納入 `.claude-plugin/plugin.json` 與 `marketplace.json` 的 plugin entry（原本這兩處未被 CI 守住，是最容易漏的同步點）。
+
 ## [1.3.0] - 2026-08-05
 
 對照《文書處理手冊》112 年版全文（自行政院官網下載第一手 PDF）與兩份釋例彙編做涵蓋度盤點後的大批補強（#15–#21）。所有新增引據均經第一手核對並登記於 `CITATIONS.md`（#12–#30）。

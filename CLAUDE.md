@@ -21,52 +21,62 @@ references/              ← SSOT（唯一手動編輯處）
         │
         ├─ build.py ──→ STANDALONE.md   ← 生成產物，禁止手動編輯（單檔完整版）
         │
+        ├─ build.py ──→ skills/tw-formal-writing/  ← 生成產物，禁止手動編輯
+        │                 SKILL.md + references/ + examples/ 的實體複本
+        │
+        ├─ build.py ──→ AGENTS.md / GEMINI.md      ← 生成產物，禁止手動編輯
+        │                 STANDALONE.md 的實體複本（Codex / Gemini CLI 入口）
+        │
    （手動維護，check_consistency 只查錨點）
         └───────────→ LITE.md           ← 手動維護的有損壓縮版（ChatGPT GPTs 字數限制用）
 
 SKILL.md                  ← Claude Code 入口（多檔案模式，執行期讀 references/）
-skills/tw-formal-writing/SKILL.md → symlink 回根目錄 SKILL.md（plugin.json 的 skills 目錄）
-AGENTS.md / GEMINI.md     → symlink 到 STANDALONE.md（Codex / Gemini CLI 入口）
-.claude-plugin/plugin.json  ← Claude Code plugin 載入用
+.claude-plugin/plugin.json      ← Claude Code plugin manifest
+.claude-plugin/marketplace.json ← 本 repo 自身即 plugin marketplace 的清單
 dist/*.zip                ← claude.ai / cowork 上傳用打包（gitignore，由 build 產）
 ```
 
 各版本的分工：
 - **SKILL.md**：執行期由 Claude Code 讀取，再依判斷結果動態 `Read` 對應的 `references/*.md`。SKILL.md 本身只有類別判斷邏輯與載入指引，**規範內容不在 SKILL.md 裡**。
 - **STANDALONE.md**：`_header.md` + 5 個 reference 檔組裝而成的單檔（各 reference 的 H1 降級為「附錄一～五」，跨檔指涉改寫為附錄指涉，見 `build.py` 的 `APPENDICES` 與 `CROSS_REF_FIXES`）。
+- **`skills/tw-formal-writing/`**：Claude Code plugin 的 skill 目錄。官方規格要求 SKILL.md 與它引用的 `references/`、`examples/` 同層（相對路徑相對 skill 目錄解析），而 SSOT 在 repo 根目錄，故此處放實體複本。v1.4.0 前這裡只有一個 SKILL.md symlink、沒有 references/，plugin 模式下規範全數讀取失敗。
+- **`AGENTS.md` / `GEMINI.md`**：Codex / Gemini CLI 的自動讀取入口，內容即 STANDALONE.md。
+
+> **為什麼三項生成產物都用實體複本、不用 symlink**：這個 repo 的散布方式全部是 `git clone`（plugin 安裝、手動 clone 給 CLI 用）。Windows 的 git 預設 `core.symlinks=false`，會把 symlink 還原成一行純文字路徑，agent 讀到的就不是規範。代價是同一份內容在 repo 內有多份複本、diff 較大，由 `build.py --check` 保證不漂移，**任何一份都不要手改**。
 - **LITE.md**：獨立手動維護，不是自動生成。`check_consistency.py` 的 `LITE_ANCHORS` 只檢查它沒漏掉關鍵規則錨點（機密 AI 禁用、最小必要個資、三個 guardrail、防諂媚 / 防冒名 / 防 injection、法律免責、引敘語 / 稱謂語方向、訴願 30 日等），不要求逐字一致。
 
 ## 常用指令
 
 ```bash
-# 改完 references/ 後重新生成 STANDALONE.md（必跑，否則 CI fail）
+# 改完 references/ 後重新生成 STANDALONE.md 與 skills/（必跑，否則 CI fail）
 python3 scripts/build.py
 
-# 只檢查 STANDALONE.md 是否為最新 build 產物，不寫檔（CI 用）
+# 只檢查兩項生成產物是否為最新，不寫檔（CI 用）
 python3 scripts/build.py --check
 
-# 完整一致性檢查：STANDALONE 是否最新 + LITE 錨點是否齊 + 三版 version 是否一致
+# 完整一致性檢查：生成產物是否最新 + LITE 錨點是否齊 + 五處 version 是否一致 + 打包清單
 python3 scripts/check_consistency.py
 ```
 
-CI（`.github/workflows/consistency.yml`）在每個 PR 和 push to main 跑 `check_consistency.py`，三項任一不過就 fail。無其他 build / test / lint。
+CI（`.github/workflows/consistency.yml`）在每個 PR 和 push to main 跑 `check_consistency.py`，四項任一不過就 fail。無其他 build / test / lint。
 
 ## 改動流程（務必照順序）
 
 1. 改 `references/` 裡對應的 reference 檔（規範內容的唯一入口）。
 2. 若改的是關鍵規則（涉及 `LITE_ANCHORS` 涵蓋的項目），**同步更新 `LITE.md`**——它是手動維護的，build 不會碰它。
-3. 跑 `python3 scripts/build.py` 重新生成 `STANDALONE.md`。
+3. 跑 `python3 scripts/build.py` 重新生成 `STANDALONE.md` 與 `skills/tw-formal-writing/`。
 4. 跑 `python3 scripts/check_consistency.py` 確認全過。
 
 常見陷阱：只改了 `references/` 忘了 rebuild → `--check` fail；改了關鍵規範但沒動 LITE → LITE 錨點雖在但內容過時（錨點檢查抓不到、需人工留意）。
 
-## 版本號的四處同步點
+## 版本號的五處同步點
 
-`version` 出現在四個地方，發版時必須一致（`check_consistency.py` 的 `check_versions` 只 gate 前三處）：
+`version` 出現在五個地方，發版時必須一致（自 v1.4.0 起 `check_consistency.py` 的 `check_versions` 全數 gate）：
 - `SKILL.md` frontmatter（**build.py 從這裡取 version 寫進 STANDALONE**，是 version 的源頭）
 - `LITE.md` frontmatter
 - `STANDALONE.md` frontmatter（由 build 自動帶入，不要手改）
-- `.claude-plugin/plugin.json` 的 `version`（CI 不 gate，容易漏，手動對齊）
+- `.claude-plugin/plugin.json` 的 `version`
+- `.claude-plugin/marketplace.json` 中 `plugins[].version`（安裝時顯示給使用者的版本號）
 
 另外 `README.md` / `README_EN.md` 的 version badge（`badge/version-vX.Y.Z`）也要對齊——CI 不 gate，發版時手動改。`CHANGELOG.md` 需有對應 `## [X.Y.Z]` entry。
 
