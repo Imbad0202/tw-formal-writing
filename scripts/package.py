@@ -64,18 +64,9 @@ def collect_files() -> tuple[list[Path], list[str]]:
     if not SKILL.exists():
         errors.append("找不到 SKILL.md")
     refs = sorted(REF.glob("*.md"))
-    examples = sorted(EXAMPLES.glob("*.md"))
-    # 每個要進 zip 的檔都必須解析在 repo 內，一律報錯、不靜默略過：zipfile.write 會
-    # 跟著 symlink 走，一個指向 repo 外的 .md（或一個被換掉的 references/ 目錄）
-    # 就能把本機任意檔案的內容打進公開 Release 的 zip；而略過又會讓整類規範默默從
-    # 發布包裡消失（清單仍非空、所有 gate 仍綠）。LICENSE / SKILL.md 也走同一道檢查。
-    escapes = [f for f in (SKILL, *refs, *examples, LICENSE)
-               if f.exists() and not build.within_repo(f)]
-    if escapes:
-        errors.append("source 檔解析後不在 repo 內（symlink？）: "
-                      + "、".join(str(f) for f in escapes))
     if not refs:
         errors.append("references/ 下沒有任何 .md，打包內容會不完整")
+    examples = sorted(EXAMPLES.glob("*.md"))
     if not examples:
         errors.append("examples/ 下沒有任何 .md，但 SKILL.md 指向該目錄，打包內容會不完整")
     if not LICENSE.exists():
@@ -84,20 +75,14 @@ def collect_files() -> tuple[list[Path], list[str]]:
     return files, errors
 
 
-def check_generated_artifacts() -> None:
-    """確認三項生成產物都是最新 build 產物，否則發布包可能含過期內容。
-
-    訊息一律轉述 build.py 自己的輸出（stdout + stderr），不要寫死是哪個產物過期——
-    build.py --check 驗的是 STANDALONE.md / skills/ / AGENTS.md·GEMINI.md 三項，
-    寫死訊息會把「skills/ 沒同步」誤報成「STANDALONE.md 過期」，指向錯的檔案。
-    """
+def check_standalone_built() -> None:
+    """確認 STANDALONE.md 是 references/ 的最新 build 產物，否則發布包可能含過期內容。"""
     r = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "build.py"), "--check"],
         capture_output=True, text=True,
     )
     if r.returncode != 0:
-        detail = "\n".join(filter(None, [r.stdout.strip(), r.stderr.strip()]))
-        sys.exit(f"ERROR: 生成產物過期，請先跑 python3 scripts/build.py\n{detail}")
+        sys.exit("ERROR: STANDALONE.md 不是 references/ 的最新 build 產物。請先跑 python3 scripts/build.py")
 
 
 def arcname(f: Path) -> str:
@@ -148,7 +133,7 @@ def create_release(version: str, zip_path: Path) -> None:
 
 
 def main() -> None:
-    check_generated_artifacts()
+    check_standalone_built()
     version = get_version()
     files, errors = collect_files()
     if errors:

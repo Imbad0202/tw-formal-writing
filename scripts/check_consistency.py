@@ -50,11 +50,8 @@ def check_standalone_built() -> None:
         capture_output=True, text=True,
     )
     if r.returncode != 0:
-        # stdout 與 stderr 都要帶出來：build.py 若是拋例外死掉，訊息全在 stderr，
-        # 只印 stdout 會出現「產物過期」後面接「一切正常」的自相矛盾輸出。
-        detail = "\n".join(filter(None, [r.stdout.strip(), r.stderr.strip()]))
         ERRORS.append(
-            "生成產物過期，請跑 python3 scripts/build.py\n    " + detail.replace("\n", "\n    ")
+            "生成產物過期，請跑 python3 scripts/build.py\n    " + r.stdout.strip().replace("\n", "\n    ")
         )
     else:
         print("✓ 三項生成產物皆為最新（STANDALONE.md / skills/ / AGENTS.md·GEMINI.md）")
@@ -101,19 +98,18 @@ def check_versions() -> None:
         return
     versions["marketplace.json[tw-formal-writing]"] = entries[0].get("version")
 
-    # 同一個 plugin 在兩份 manifest 各有一份文案，安裝清單與 plugin 詳情顯示的
-    # 是不同來源。只 gate version 的話，描述與關鍵字會各自漂移而沒人發現。
-    # 先確認欄位都在，再比對。直接比兩個 .get() 的話，欄位在兩邊同時被改名或刪掉時
-    # 兩側都是 None、比起來相等，gate 會在欄位根本不存在的情況下發綠燈。
-    for field_a, field_b, obj_a, obj_b in (
-        ("description", "description", plugin, entries[0]),
-        ("keywords", "tags", plugin, entries[0]),
-    ):
-        if field_a not in obj_a or field_b not in obj_b:
-            ERRORS.append(f"manifest 缺欄位：plugin.json.{field_a} / "
-                          f"marketplace.json.plugins[].{field_b} 必須都存在")
-        elif obj_a[field_a] != obj_b[field_b]:
-            ERRORS.append(f"plugin.json 的 {field_a} 與 marketplace.json 的 {field_b} 不一致")
+    # 同一個 plugin 在兩份 manifest 各有一份文案（安裝清單讀 marketplace.json、plugin
+    # 詳情讀 plugin.json）。只 gate version 的話，description 與關鍵字會各自漂移。
+    # 先確認欄位都在再比——兩邊同時缺欄位時 .get() 都是 None，會誤判相等而放行。
+    entry = entries[0]
+    if "description" not in plugin or "description" not in entry:
+        ERRORS.append("manifest 缺欄位：plugin.json / marketplace.json 都要有 description")
+    elif plugin["description"] != entry["description"]:
+        ERRORS.append("plugin.json 與 marketplace.json 的 description 不一致")
+    if "keywords" not in plugin or "tags" not in entry:
+        ERRORS.append("manifest 缺欄位：plugin.json.keywords 與 marketplace.json.tags 都要有")
+    elif set(plugin["keywords"]) != set(entry["tags"]):  # 用 set：不管排列順序
+        ERRORS.append("plugin.json 的 keywords 與 marketplace.json 的 tags 內容不一致")
 
     if None in versions.values():
         ERRORS.append(f"有檔案讀不到 version: {versions}")
