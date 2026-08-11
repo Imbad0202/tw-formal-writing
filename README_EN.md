@@ -38,7 +38,7 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 
 ## What's New (v1.4.1)
 
-v1.4.1 fixes the seven issues raised by code review and security review of v1.4.0 (an incomplete plugin-update instruction in the README, a build script that could delete a directory outside the repo, a dangling cross-reference in the single-file build, and more). No guidance content changed; see the [CHANGELOG](CHANGELOG.md).
+v1.4.1: fixes a few docs and script rough edges from v1.4.0, including the README update instruction, a dangling cross-reference to a nonexistent file in the single-file build, and a macOS temp file that could make the local consistency check misfire. No guidance content changed; see the [CHANGELOG](CHANGELOG.md).
 
 v1.4.0: this repo is now also a Claude Code plugin marketplace, installable directly via `/plugin marketplace add` (see the Claude Code section below) in both the CLI and the desktop app. This release also fixes the guidance files being unreachable in plugin mode, and removes every symlink from the repo (they break on Windows clones).
 
@@ -99,7 +99,7 @@ This repo is itself a Claude Code plugin marketplace. In Claude Code (CLI or des
 /plugin install tw-formal-writing@tw-formal-writing
 ```
 
-Use `/plugin` afterwards to enable or disable it. Updating to newer guidance takes two steps: `/plugin marketplace update tw-formal-writing` refreshes the catalog, then `/plugin update tw-formal-writing` replaces what is actually installed — the first command alone does not update your copy.
+Use `/plugin` afterwards to enable or disable it. To update to a newer version, run `claude plugin update tw-formal-writing` in your terminal, then restart Claude Code to apply.
 
 **Method B: clone manually as a skill**
 

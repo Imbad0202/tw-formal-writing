@@ -77,48 +77,16 @@ metadata:
 
 WARNING = "<!-- 本檔由 scripts/build.py 從 references/ 自動生成，請勿手動編輯。改規範請改 references/ 後重新 build。 -->\n\n"
 
-# references 內的跨檔指涉 → STANDALONE 內的附錄指涉(讓單檔讀起來自然)。
-# 用 regex 涵蓋 `xxx.md` 與 `references/xxx.md` 兩種寫法：早期是逐句字面比對，
-# 新增的第二種句型就漏改、把死連結留在單檔版裡(v1.3.0 起殘留於 STANDALONE 780 行)。
-# 前後各吃掉一個可能的空格：原文的空格是給行內程式碼留的間隔，換成中文詞之後
-# 留著就變成中文字之間的贅空格。
-CROSS_REF_RE = re.compile(
-    r" ?`(?:references/)?(" + "|".join(re.escape(f) for f, _ in APPENDICES) + r")` ?"
-)
-APPENDIX_NUM = {fname: num for fname, num in APPENDICES}
-
-
-def within_repo(p: Path) -> bool:
-    """p 解析後是否仍落在 repo 內（不存在或解析失敗都算不在）。
-
-    用 resolve() 而不是 is_symlink()：後者只看路徑末端，`references/` 這個「目錄」
-    被換成指向 repo 外的 symlink 時，底下每個 .md 的 is_symlink() 都是 False，
-    檢查末端完全擋不住。resolve() 會把中間每一段都攤開，兩種情況一起涵蓋。
-    """
-    try:
-        return ROOT in p.resolve(strict=True).parents
-    except OSError:
-        return False
+# references 內的跨檔指涉 → STANDALONE 內的附錄指涉(讓單檔讀起來自然)
+CROSS_REF_FIXES = [
+    ("`official-letter.md` ", "附錄一（政府公文撰寫規範）"),
+    ("完整表見 `references/terminology-tables.md`", "完整表見附錄二"),
+    ("更完整的用語對照表請參閱 `references/terminology-tables.md`。", "更完整的用語對照表請參閱附錄二（公文用語詳細對照表）。"),
+]
 
 
 def read(p: Path) -> str:
-    """讀 source 檔，但拒絕解析到 repo 外的路徑。
-
-    擋在最底層是刻意的：規範內容會被鏡射進 git 追蹤的 skills/、組進 STANDALONE.md
-    (以及 AGENTS.md / GEMINI.md)、打進公開 Release 的 zip。任何一條讀取路徑漏掉檢查，
-    一個指向 repo 外的 .md（或一個被換掉的 references/ 目錄）就能把本機檔案內容
-    推上這個 public repo。
-    也不「跳過就算了」——那會讓整類規範默默消失而所有 gate 仍綠(v1.4.1 初版的錯)。
-    """
-    if not within_repo(p):
-        sys.exit(f"ERROR: {p} 解析後不在 repo 內。source 檔不得為 symlink、"
-                 "也不得指向 repo 外，請改為實體檔。")
     return p.read_text(encoding="utf-8")
-
-
-def cross_ref_fix(text: str) -> str:
-    """把跨檔指涉改寫成附錄指涉（單檔版沒有 references/，留著就是死連結）。"""
-    return CROSS_REF_RE.sub(lambda m: f"附錄{APPENDIX_NUM[m.group(1)]}", text)
 
 
 def get_skill_meta() -> tuple[str, str]:
@@ -135,9 +103,7 @@ def build() -> str:
     version, updated = get_skill_meta()
     parts = [FRONTMATTER.format(version=version, last_updated=updated), WARNING]
 
-    # 頭部也要跑跨檔指涉改寫：只改附錄本體的話，寫在 _header.md 裡的跨檔指涉
-    # 會被下面的收尾斷言擋下來（維護者寫一句自然的指涉就 build 不過）。
-    header = cross_ref_fix(read(REF / "_header.md").rstrip()) + "\n"
+    header = read(REF / "_header.md").rstrip() + "\n"
     parts.append(header)
 
     for fname, num in APPENDICES:
@@ -145,38 +111,18 @@ def build() -> str:
         # 第一個 H1「# xxx規範」→「# 附錄N：xxx規範」
         body = re.sub(r"^# (.+)$", rf"# 附錄{num}：\1", body, count=1, flags=re.M)
         # 跨檔指涉 → 附錄指涉
-        body = cross_ref_fix(body)
+        for src, dst in CROSS_REF_FIXES:
+            body = body.replace(src, dst)
         parts.append("\n---\n\n" + body + "\n")
 
     result = "\n".join(parts).rstrip() + "\n"
-
-    # 收尾斷言：單檔版不該再有指向 references/ 的路徑，那對單檔使用者是死連結。
-    # WARNING 那行是 build 自己的註解、本來就會提到 references/，整行比對後排除
-    #（不能用 `line not in WARNING` 這種子字串測試——任何剛好是 WARNING 子字串的
-    # 內容行都會被誤放行）。
     warning_lines = set(WARNING.splitlines())
-    leftovers = [
-        line for line in result.splitlines()
-        if "references/" in line and line not in warning_lines
-    ]
-    if leftovers:
-        sys.exit("ERROR: 生成內容仍殘留指向 references/ 的死連結：\n  "
-                 + "\n  ".join(leftovers))
-
+    dead = [ln for ln in result.splitlines()
+            if "references/" in ln and ln not in warning_lines]
+    if dead:
+        sys.exit("ERROR: 單檔版殘留指向 references/ 的死連結（CROSS_REF_FIXES 未涵蓋）：\n  "
+                 + "\n  ".join(dead))
     return result
-
-
-def assert_within_repo(path: Path) -> None:
-    """確認 path 解析後仍落在 repo 內的預期位置，否則中止。
-
-    走的是 parent 的 resolve()：path 自己可能還不存在（尚未建立），但它上層若被
-    換成指向 repo 外的 symlink，parent 解析出來就會跑出 ROOT。
-    """
-    parent = path.parent.resolve()
-    root = ROOT.resolve()
-    if parent != root and root not in parent.parents:
-        sys.exit(f"ERROR: {path} 的上層解析到 repo 外（{parent}），拒絕寫入或刪除。"
-                 f"請檢查 {path.parent.name}/ 是否被換成 symlink。")
 
 
 def plugin_skill_contents() -> dict[str, str]:
@@ -188,7 +134,7 @@ def plugin_skill_contents() -> dict[str, str]:
     files = {"SKILL.md": read(ROOT / "SKILL.md")}
     for src_dir in (REF, EXAMPLES):
         for f in sorted(src_dir.glob("*.md")):
-            files[f"{src_dir.name}/{f.name}"] = read(f)  # read() 擋 symlink
+            files[f"{src_dir.name}/{f.name}"] = read(f)
     return files
 
 
@@ -197,40 +143,20 @@ def sync_plugin_skill(check: bool) -> bool:
     want = plugin_skill_contents()
 
     if check:
-        # 先比檔名集合，再只讀「該有的檔」。不要無差別讀取目錄下每個檔——
-        # 一個 .DS_Store 之類的二進位雜檔就會讓 read() 丟 UnicodeDecodeError，
-        # CI 直接 traceback 死掉、且訊息完全指不到問題。
-        # 忽略點檔（.DS_Store 之類 macOS 在 Finder 開資料夾就會生的雜檔）：它們不是
-        # 鏡射內容的一部分，拿它們去 FAIL 只會讓本機檢查無故變紅、且無法自癒。
-        have_names = {
-            rel for p in PLUGIN_SKILL.rglob("*") if p.is_file()
-            for rel in [p.relative_to(PLUGIN_SKILL).as_posix()]
-            if not any(part.startswith(".") for part in Path(rel).parts)
-        } if PLUGIN_SKILL.is_dir() else set()
-        if have_names != set(want):
-            extra = sorted(have_names - set(want))
-            missing = sorted(set(want) - have_names)
-            detail = "；".join(filter(None, [
-                f"多出 {'、'.join(extra)}" if extra else "",
-                f"缺少 {'、'.join(missing)}" if missing else "",
-            ]))
-            print(f"FAIL: skills/tw-formal-writing/ 檔案清單不符（{detail}）。"
-                  "請跑 python3 scripts/build.py 重新生成。")
-            return False
-        stale = [rel for rel, text in want.items() if read(PLUGIN_SKILL / rel) != text]
-        if stale:
-            print(f"FAIL: skills/tw-formal-writing/ 內容過期（{'、'.join(stale)}）。"
+        # 只比 .md：mirror 內容都是 .md，這樣 .DS_Store 之類 macOS 在 Finder 開
+        # 資料夾就會生的雜檔不會被讀成 UTF-8 而讓本機檢查 traceback。
+        have = {
+            p.relative_to(PLUGIN_SKILL).as_posix(): read(p)
+            for p in PLUGIN_SKILL.rglob("*.md")
+        } if PLUGIN_SKILL.is_dir() else {}
+        if have != want:
+            print("FAIL: skills/tw-formal-writing/ 與 SKILL.md / references/ / examples/ 不一致。"
                   "請跑 python3 scripts/build.py 重新生成。")
             return False
         print(f"OK: skills/tw-formal-writing/ 與 source 一致（{len(want)} 檔）")
         return True
 
-    # 確認要動的是 repo 內那個目錄，再刪、再寫。檢查必須在「刪除與寫入」兩者之前：
-    # 只擋刪除的話，skills/ 指向 repo 外、而外面還沒有 tw-formal-writing/ 時，
-    # 兩個分支都不進，下面的 mkdir(parents=True) 會直接在 repo 外建目錄寫 11 個檔。
-    # 只驗末端是不是 symlink 也不夠——上層 skills/ 被換掉時末端不是 symlink。
-    assert_within_repo(PLUGIN_SKILL)
-
+    # 整個重建：舊檔可能是 symlink（v1.2.2 的做法），直接寫入會穿透寫回 SSOT
     if PLUGIN_SKILL.is_symlink():
         PLUGIN_SKILL.unlink()
     elif PLUGIN_SKILL.exists():
@@ -258,7 +184,6 @@ def sync_vendor_entries(standalone: str, check: bool) -> bool:
 
     for f in VENDOR_ENTRIES:
         p = ROOT / f
-        assert_within_repo(p)
         # 舊版是 symlink 指向 STANDALONE.md，直接寫入會穿透覆蓋目標
         if p.is_symlink():
             p.unlink()

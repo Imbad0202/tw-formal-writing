@@ -38,7 +38,7 @@
 
 ## 最新版本亮點（v1.4.1）
 
-v1.4.1 修正了 v1.4.0 code review 與 security review 抓出的七項問題（README 的 plugin 更新指令不完整、build 腳本可能刪到 repo 外的目錄、單檔版殘留死連結等），不動規範內容，詳見 [CHANGELOG](CHANGELOG.md)。
+v1.4.1：修正 v1.4.0 的幾個文件與腳本小瑕疵，包括 README 的更新指令、單檔版一處指向不存在檔案的死連結，以及一個 macOS 暫存檔會讓本機檢查誤報的問題。不動規範內容，詳見 [CHANGELOG](CHANGELOG.md)。
 
 v1.4.0：本 repo 同時是一個 Claude Code plugin marketplace，可直接用 `/plugin marketplace add` 安裝（見下方「Claude Code」段），CLI 與桌面版皆適用。同時修正 plugin 模式下讀不到規範內容的問題，並移除 repo 內全部 symlink（Windows clone 會失效）。
 
@@ -98,7 +98,7 @@ v1.4.0：本 repo 同時是一個 Claude Code plugin marketplace，可直接用 
 /plugin install tw-formal-writing@tw-formal-writing
 ```
 
-之後用 `/plugin` 進選單即可啟用或停用。要更新到新版規範需要兩步：先 `/plugin marketplace update tw-formal-writing` 刷新清單，再 `/plugin update tw-formal-writing` 換掉已安裝的內容——只做前者不會更新你手上的規範。
+之後用 `/plugin` 進選單即可啟用或停用。要更新到新版，在終端機執行 `claude plugin update tw-formal-writing`，更新後重啟 Claude Code 生效。
 
 **方法 B：手動 clone 成 skill**
 

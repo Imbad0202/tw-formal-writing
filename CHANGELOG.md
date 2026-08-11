@@ -4,23 +4,17 @@
 
 ## [1.4.1] - 2026-08-10
 
-修正 v1.4.0 的 `/code-review` 與 `/security-review` findings，全部經回歸測試驗證。不動規範內容。
+回到單純的 build 腳本，只保留真正對使用者與維護有益的小修。不動規範內容。
+
+v1.4.0 的兩輪 review 曾建議加一套「防惡意 symlink PR」的檢查（防範外部貢獻者送含惡意符號連結的 PR、維護者在本機 clone 後跑腳本時被寫檔到 repo 外）。該防護連續數輪自身反覆出現破綻，且其防範的情境對這個單人維護的內容 repo 發生機率極低、可用「合併前先審 PR」覆蓋。經評估後整套移除，腳本回到 v1.4.0 的簡單結構。
 
 ### Fixed
-- **README 的 plugin 更新指令不完整（中英）**：原寫「更新規範只要 `/plugin marketplace update`」，但那只刷新 marketplace 清單，不會換掉已安裝的內容——使用者會以為更新了卻仍在用舊版公文規範。補上必要的第二步 `/plugin update tw-formal-writing`。
-- **`build.py` 的 `shutil.rmtree` 可刪到 repo 外**：原本只驗末端 `skills/tw-formal-writing` 是否為 symlink，上層 `skills/` 被換成指向 repo 外的 symlink 時會順著走出去刪掉外部目錄（PR 可夾帶，維護者跑 `build.py` 即中；CI 的 `--check` 不受影響）。刪除前改為解析並確認仍在 repo 內。
-- **單檔版殘留死連結**：`CROSS_REF_FIXES` 逐句字面比對，新增句型漏改，`references/terminology-tables.md` 這類路徑留在 STANDALONE / AGENTS / GEMINI 裡，對單檔使用者是不存在的檔案。改為 regex 涵蓋 `` `xxx.md` `` 與 `` `references/xxx.md` `` 兩種寫法（一併去除替換後中文間的贅空格），並加收尾斷言：生成內容若仍殘留 `references/` 路徑就中止 build。
-- **一個 `.DS_Store` 就讓 CI 永久紅**：`--check` 原本無差別讀取 `skills/` 下每個檔並當 UTF-8 解，遇二進位雜檔直接 `UnicodeDecodeError`。改為先比檔名集合、再只讀該有的檔，並在訊息中列出多出／缺少哪些檔。`.gitignore` 補 `.DS_Store`。
-- **`check_consistency.py` 丟掉 stderr**：build.py 若拋例外，訊息全在 stderr，輸出會變成「產物過期」後面接「一切正常」的自相矛盾內容。改為 stdout + stderr 都帶出。
-- **`package.py` 的錯誤訊息過期**：v1.4.0 把 `build.py --check` 從驗一項擴為三項，但 `package.py` 仍寫死「STANDALONE.md 過期」且丟掉輸出，`skills/` 沒同步時會指向錯的檔案。改為轉述 build.py 自己的輸出（函式更名 `check_generated_artifacts`）。
-- **`marketplace.json` 的 `$schema` 404**：該 URL 301 後 404，編輯器驗證等於沒作用（Claude Code 載入時本就忽略此欄）。移除。
+- **README 的 plugin 更新指令（中英）**：原寫成刷新 marketplace 清單即可，實際上那不會換掉已安裝的內容。改為指向確實存在的 `claude plugin update tw-formal-writing`（更新後重啟 Claude Code 生效）。
+- **單檔版殘留死連結**：`references/terminology-tables.md` 這個跨檔指涉未被改寫，留在 `STANDALONE.md` / `AGENTS.md` / `GEMINI.md` 裡，對單檔使用者是不存在的檔案。於 `CROSS_REF_FIXES` 補上對應字面對照，改寫為附錄指涉。
+- **`.DS_Store` 會讓本機檢查誤報**：`build.py --check` 原本讀取 `skills/` 下每個檔並當 UTF-8 解，遇 macOS 暫存檔會 `UnicodeDecodeError`。改為只讀 `.md`（mirror 內容本就都是 `.md`）。`.gitignore` 亦已收錄 `.DS_Store`。
 
 ### Added
-- **source 路徑限制在 repo 內**：`build.py` 的 `read()` 與 `package.py` 的 `collect_files()` 一律要求 source 檔 `resolve()` 後仍在 repo 內，否則中止（不是跳過——跳過會讓整類規範默默從 skill 包與發布 zip 消失，而所有 gate 仍綠）。涵蓋 `SKILL.md`、`LICENSE`、`references/*.md`、`examples/*.md`。
-
-  用 `resolve()` 而不是檢查末端是否為 symlink：後者只看路徑最後一段，`references/` 這個**目錄**被換成指向 repo 外的 symlink 時，底下每個 `.md` 的 `is_symlink()` 都是 `False`，完全擋不住。原本兩條路徑都會跟著連結走，一個 PR 就能把維護者本機任意檔案的內容帶進這個 public repo 的追蹤檔、單檔版（`STANDALONE.md` / `AGENTS.md` / `GEMINI.md`）以及公開 Release 的 zip。
-- **寫入目標同樣限制在 repo 內**：`skills/` 被換成指向 repo 外的 symlink 且外部尚無同名子目錄時，刪除分支不會進入，寫入迴圈會直接在 repo 外建目錄寫檔。改為在刪除與寫入之前都先驗證。
-- **manifest 文案漂移 gate**：`plugin.json` 與 `marketplace.json` 的 `description`、`keywords`／`tags` 納入一致性檢查（原本只 gate `version`，兩份文案已各自漂移）。
+- **manifest 文案漂移 gate**：`plugin.json` 與 `marketplace.json` 的 `description`、`keywords`／`tags` 納入一致性檢查（原本只 gate `version`）。關鍵字比對用集合，不受排列順序影響。
 
 ## [1.4.0] - 2026-08-10
 
