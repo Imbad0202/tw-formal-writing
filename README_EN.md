@@ -2,7 +2,7 @@ English | **[中文](README.md)**
 
 # Taiwan Official Document Writing AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.4.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,7 +36,11 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | Legal Documents | Certified Letter (存證信函), Contract (合約書), Lawyer's Letter (律師函), MOU (備忘錄), Declaration (聲明書), Affidavit (切結書), Power of Attorney (委託書) |
 | Citizen-to-Government | Petition (陳情書), Application (申請書), Administrative Appeal (訴願書), Objection (異議書) |
 
-## What's New (v1.4.1)
+## What's New (v1.5.0)
+
+Adds [12 case scenarios](references/official-scenarios.md): reminders, extensions, requests for missing documents, application denials, opportunities to state an opinion, petition responses and transfers, corrections, internal consultation, site inspections, meeting follow-up, personal correspondence on official business, and official telephone records. Each covers required context, document selection, and drafting decisions. The single-file edition includes them in Appendix 6; multi-file skills read relevant scenarios as needed.
+
+Also fixes inconsistent instructions for drafting after approval, meeting-record and notice fields, overgeneralized remedies guidance, and an example that incorrectly rejected the citation phrase 依據. See the [coverage audit and remaining gaps](docs/scenario-coverage.md), [20 behavioral evaluation cases](docs/scenario-evaluation.md), and [worked examples](examples/05-case-follow-up.md). Specialized rulemaking, joint issuance, procurement, and information-access workflows still need dedicated guidance.
 
 v1.4.1: fixes a few docs and script rough edges from v1.4.0, including the README update instruction, a dangling cross-reference to a nonexistent file in the single-file build, and a macOS temp file that could make the local consistency check misfire. No guidance content changed; see the [CHANGELOG](CHANGELOG.md).
 
@@ -48,8 +52,8 @@ The previous release (v1.3.0) was a batch reinforcement of the guidance itself: 
 
 | File | Size | Use Case |
 |------|------|----------|
-| `LITE.md` | ~2K Chinese characters | ChatGPT GPTs Instructions (size-limited fields) |
-| `STANDALONE.md` | ~26K characters | File upload (full version with quality checks) |
+| `LITE.md` | Concise summary | ChatGPT GPTs Instructions (size-limited fields) |
+| `STANDALONE.md` | Complete single file | File upload (6 appendices and quality checks) |
 | `SKILL.md` + `references/` | Multi-file | Tools that support multi-file skills (Claude Code, etc.) |
 | `skill.zip` ([Releases](https://github.com/Imbad0202/tw-formal-writing/releases) asset) | Packaged | Tools that accept a skill bundle upload (claude.ai / cowork) |
 
@@ -127,7 +131,7 @@ After cloning, it works in your working directory: `AGENTS.md` (Codex, etc.) and
 ### Gemini Gems
 
 1. Go to [Gemini](https://gemini.google.com) → Gems → Create a new Gem
-2. Paste the entire contents of `STANDALONE.md` into the instructions field (~26K characters, approaching Gems' ~30K limit)
+2. Use the full edition where the current interface has enough capacity. If the instructions field is too small, use the summary and attach `STANDALONE.md` as reference material where attachments are supported. The full edition grows with updates; fitting every platform's instructions field is not guaranteed.
 
 ## Important Notice
 
