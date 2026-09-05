@@ -6,6 +6,7 @@
 2. LITE.md 是否涵蓋關鍵規則錨點（LITE 是有損壓縮，不要求逐字一致，只查錨點不漏）
 3. 五處 version 是否一致（SKILL / LITE / STANDALONE / plugin.json / marketplace.json）
 4. skill 包打包清單齊全（package.py 要打進 zip 的檔都在，避免誤刪 examples/ 或 LICENSE）
+5. 每個規範 reference 都列入單檔附錄（避免新場景只進 plugin、漏進 STANDALONE）
 
 用法: python3 scripts/check_consistency.py   # 任一不過 exit 1
 """
@@ -17,6 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import package  # 複用 collect_files() 驗打包清單（單一真實來源，不重寫規則）
+import build
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -80,6 +82,23 @@ def check_package_manifest() -> None:
         print("✓ skill 包打包清單齊全（SKILL / references / examples / LICENSE）")
 
 
+def check_appendix_manifest() -> None:
+    """references/ 除頭部外都是規範，須在各入口提供相同內容。"""
+    sources = {p.name for p in (ROOT / "references").glob("*.md") if p.name != "_header.md"}
+    names = [name for name, _ in build.APPENDICES]
+    numbers = [number for _, number in build.APPENDICES]
+    missing = sources - set(names)
+    extra = set(names) - sources
+    if missing:
+        ERRORS.append("單檔附錄漏列 reference: " + "、".join(sorted(missing)))
+    if extra:
+        ERRORS.append("單檔附錄指向不存在的 reference: " + "、".join(sorted(extra)))
+    if len(names) != len(set(names)) or len(numbers) != len(set(numbers)):
+        ERRORS.append("單檔附錄檔名或編號重複")
+    if not missing and not extra and len(names) == len(set(names)) and len(numbers) == len(set(numbers)):
+        print(f"✓ 全部 {len(sources)} 個規範 reference 皆列入單檔附錄，編號無重複")
+
+
 def check_versions() -> None:
     """五個 version 同步點：三份 markdown + plugin.json + marketplace.json 的 plugin entry。
 
@@ -124,6 +143,7 @@ def main() -> None:
     check_standalone_built()
     check_lite_anchors()
     check_package_manifest()
+    check_appendix_manifest()
     check_versions()
     if ERRORS:
         print("\nFAIL:")

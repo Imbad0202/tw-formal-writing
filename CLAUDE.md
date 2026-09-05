@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 這個 repo 是什麼
 
-一個「內容型」skill，不是程式碼專案。核心產物是**中文正式文件撰寫規範**（台灣政府公文、政府非公文文件、法律文件、人民對政府文書四類），以多種入口分發給不同 AI 工具（Claude Code / ChatGPT / Gemini / Codex）。Python 腳本只負責從單一來源組裝各版本、並在 CI gate 一致性。這是 **public repo**——動任何內容前先讀下方「Public repo 紀律」。
+一個「內容型」skill，不是程式碼專案。核心產物是**中文正式文件撰寫規範**（台灣政府公文、政府機關其他文件、法律文件、人民對政府文書四類），以多種入口分發給不同 AI 工具（Claude Code / ChatGPT / Gemini / Codex）。Python 腳本只負責從單一來源組裝各版本、並在 CI gate 一致性。這是 **public repo**——動任何內容前先讀下方「Public repo 紀律」。
 
 ## 內容架構：單一真實來源 → 多入口
 
@@ -18,6 +18,7 @@ references/              ← SSOT（唯一手動編輯處）
   gov-documents.md         類別2 政府其他文件
   legal-documents.md       類別3 法律文件
   civil-petition.md        類別4 人民對政府文書
+  official-scenarios.md    公文案件場景補充（按需選讀）
         │
         ├─ build.py ──→ STANDALONE.md   ← 生成產物，禁止手動編輯（單檔完整版）
         │
@@ -38,7 +39,7 @@ dist/*.zip                ← claude.ai / cowork 上傳用打包（gitignore，�
 
 各版本的分工：
 - **SKILL.md**：執行期由 Claude Code 讀取，再依判斷結果動態 `Read` 對應的 `references/*.md`。SKILL.md 本身只有類別判斷邏輯與載入指引，**規範內容不在 SKILL.md 裡**。
-- **STANDALONE.md**：`_header.md` + 5 個 reference 檔組裝而成的單檔（各 reference 的 H1 降級為「附錄一～五」，跨檔指涉改寫為附錄指涉，見 `build.py` 的 `APPENDICES` 與 `CROSS_REF_FIXES`）。
+- **STANDALONE.md**：`_header.md` + 6 個 reference 檔組裝而成的單檔（各 reference 的 H1 降級為「附錄一～六」，跨檔指涉改寫為附錄指涉，見 `build.py` 的 `APPENDICES` 與 `CROSS_REF_FIXES`）。
 - **`skills/tw-formal-writing/`**：Claude Code plugin 的 skill 目錄。官方規格要求 SKILL.md 與它引用的 `references/`、`examples/` 同層（相對路徑相對 skill 目錄解析），而 SSOT 在 repo 根目錄，故此處放實體複本。v1.4.0 前這裡只有一個 SKILL.md symlink、沒有 references/，plugin 模式下規範全數讀取失敗。
 - **`AGENTS.md` / `GEMINI.md`**：Codex / Gemini CLI 的自動讀取入口，內容即 STANDALONE.md。
 
@@ -58,7 +59,7 @@ python3 scripts/build.py --check
 python3 scripts/check_consistency.py
 ```
 
-CI（`.github/workflows/consistency.yml`）在每個 PR 和 push to main 跑 `check_consistency.py`，四項任一不過就 fail。無其他 build / test / lint。
+CI（`.github/workflows/consistency.yml`）在每個 PR 和 push to main 跑 `check_consistency.py`，另檢查所有規範 reference 都列入單檔附錄，任一不過就 fail。模型行為的人工試跑題目見 `docs/scenario-evaluation.md`，不由 CI 自動評分。
 
 ## 改動流程（務必照順序）
 

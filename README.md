@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.4.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,7 +36,11 @@
 | 法律文件 | 存證信函、合約書、律師函、備忘錄(MOU)、聲明書、切結書、委託書 |
 | 人民對政府 | 陳情書、申請書、訴願書、異議書 |
 
-## 最新版本亮點（v1.4.1）
+## 最新版本亮點（v1.5.0）
+
+新增 [12組案件場景指引](references/official-scenarios.md)：催辦、展期、補正、否准、陳述意見通知、陳情答復與移轉、原函更正、會辦便簽、會勘、會議後續、箋函、公務電話紀錄。每組提供必要資訊、文別判斷及撰寫重點；單檔版收於附錄六，多檔 skill 依需求選讀。
+
+同時修正先簽後稿的產出順序、會議紀錄與通知單欄位、救濟教示的過度概括，以及舊範例誤判「依據」的問題。新增 [涵蓋度與後續缺口盤點](docs/scenario-coverage.md)、[20題行為檢查規格](docs/scenario-evaluation.md)與[案件後續範例](examples/05-case-follow-up.md)。法規預告、會銜完整流程、採購及資訊公開等仍需專章補強，未列為完整支援。
 
 v1.4.1：修正 v1.4.0 的幾個文件與腳本小瑕疵，包括 README 的更新指令、單檔版一處指向不存在檔案的死連結，以及一個 macOS 暫存檔會讓本機檢查誤報的問題。不動規範內容，詳見 [CHANGELOG](CHANGELOG.md)。
 
@@ -48,8 +52,8 @@ v1.4.0：本 repo 同時是一個 Claude Code plugin marketplace，可直接用 
 
 | 檔案 | 大小 | 適用場景 |
 |-----|-----|--------|
-| `LITE.md` | ~2K 中文字 | ChatGPT GPTs Instructions（有字數限制） |
-| `STANDALONE.md` | ~28K 字元 | 檔案上傳（完整版，含品質檢核） |
+| `LITE.md` | 精簡摘要 | ChatGPT GPTs Instructions（有字數限制） |
+| `STANDALONE.md` | 完整單檔 | 檔案上傳（含6個附錄與品質檢核） |
 | `SKILL.md` + `references/` | 多檔案 | Claude Code 等支援多檔案的工具 |
 | `skill.zip`（[Releases](https://github.com/Imbad0202/tw-formal-writing/releases) 附件） | 打包 | claude.ai / cowork 等可上傳 skill 包者 |
 
@@ -126,7 +130,7 @@ clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ 
 ### Gemini Gems
 
 1. 前往 [Gemini](https://gemini.google.com) → Gems → 新建 Gem
-2. 將 `STANDALONE.md` 的全部內容貼入指示欄位（~26K 字元，Gems 上限 ~30K 字元，放得下但接近上限）
+2. 依當下介面提供的容量使用完整單檔；若指示欄位容納不下，改採精簡版，並在介面支援時附上 `STANDALONE.md` 作為參考檔。完整內容會隨版本增加，不保證可直接貼入所有平台的指示欄位。
 
 ## 注意事項
 
@@ -141,6 +145,8 @@ clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ 
 - 「我要公告裁罰違規食品業者的結果」
 - 「我想寄存證信函催房東退還押金」
 - 「幫我寫陳情書向市政府反映噪音問題」
+- 「我是承辦人，這封函已經發出但附件有錯，幫我整理更正內容及需要確認的資訊」
+- 「我是主辦科承辦人，要請主計室會辦經費表，計畫尚未核定，請擬便簽」
 
 AI 會自動判斷文件類別、確認必要資訊、產出合規文件、執行品質檢核。
 
