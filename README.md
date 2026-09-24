@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.5.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.2-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -14,7 +14,7 @@
 - 新進人員沒受過完整公文訓練，邊寫邊猜、邊被退件邊學
 - 引敘語「奉/准/據」、稱謂語「鈞/貴/大」、期望語「請鑒核/請查照」搞不清楚，用錯就是失禮
 - 簽辦方式（先簽後稿、簽稿併陳、以稿代簽）選錯，整個流程要重來
-- 已廢除的贅詞（為要、為荷、鑒核示遵）還在用，被長官圈起來退回
+- 早已取消的結尾語（為要、為荷、為禱）還在用，被長官圈起來退回
 
 **一般民眾面臨的現實：**
 - 想向政府陳情、申請、訴願，但完全不知道格式怎麼寫
@@ -36,7 +36,9 @@
 | 法律文件 | 存證信函、合約書、律師函、備忘錄(MOU)、聲明書、切結書、委託書 |
 | 人民對政府 | 陳情書、申請書、訴願書、異議書 |
 
-## 最新版本亮點（v1.5.1）
+## 最新版本亮點（v1.5.2）
+
+v1.5.2：對照《文書處理手冊》、行政院兩份釋例彙編與國家文官學院《公文撰作解析》（114 年 12 月版）逐項查核，修正規範中誤解原文、誤引原文或查無出處的內容，例如「上行函不用第三段」「簽於何處只寫最末級單位」「中文函不夾英文」等說法，並更正多處釋例日期與附錄號。只見於教材、手冊未規定的慣例（如奉／准／據的方向、上行函不用「辦法」段名、公告不寫期望語），檢核由「錯誤」改為「警告」，並寫明警告是提醒使用者、說明依據，由使用者決定是否修改；釋例與教材說法不同之處兩邊並列。另依教材補入分對象的准駁語、期望語及「抄發」。各版本收到哪些改動見 [CHANGELOG](CHANGELOG.md)。各平台都未做模型實測。
 
 v1.5.1：對照目前 Claude 模型照字面遵循指示的特性，盤點並調整規範寫法。公文第一步的資訊確認改為能從描述推知的直接判斷，推知不了且會影響寫法才詢問；另刪去 `SKILL.md` 一行強調說明，並修正三處內容錯誤。公文規範的改動也進入 `STANDALONE.md` 完整單檔與 Codex、Gemini 入口檔，各版本收到哪些改動見 [CHANGELOG](CHANGELOG.md)。各平台都未做模型實測。
 
@@ -129,6 +131,12 @@ git clone https://github.com/Imbad0202/tw-formal-writing.git
 ```
 clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ `GEMINI.md`（Gemini CLI）內容即 `STANDALONE.md` 完整單檔，agent 會自動讀取。
 
+Codex 預設自動載入 `AGENTS.md` 的上限是 32 KiB，而完整單檔超過 100 KiB，所以只會載入公文規範的前段（約到稱謂語），之後的期望語、品質檢核關卡與其他類別都不會自動載入。要讓 Codex 載入完整規範，請在 Codex 設定檔 `~/.codex/config.toml` 最前面、任何 `[...]` 段落標題之前加入下面這一行（放在段落標題之後會被當成該段落的設定，不會生效），或在執行 Codex 時加上 `-c project_doc_max_bytes=262144`：
+
+```toml
+project_doc_max_bytes = 262144
+```
+
 ### Gemini Gems
 
 1. 前往 [Gemini](https://gemini.google.com) → Gems → 新建 Gem
@@ -137,6 +145,8 @@ clone 後於工作目錄即可使用：根目錄的 `AGENTS.md`（Codex 等）/ 
 ## 注意事項
 
 > **依[行政院及所屬機關（構）使用生成式 AI 參考指引](https://www.ey.gov.tw/Page/448DE008087A1971/40c1a925-121d-4b6b-8f40-7e9e1a5401f2)，機密文書應由承辦人親自撰寫，禁止使用生成式 AI 輔助。使用本工具時，請勿輸入涉及機密、未經機關同意公開之資訊，或與案件無關的個資。若屬人民對政府文書，僅提供該程序必要的最小識別與聯絡資訊；除非相關法規、機關表單或案件流程明文要求，避免輸入身分證字號、證件影本等高敏感資料。**
+
+這個 skill 提供的是通用指引，不是標準答案或唯一寫法，立場與《文書處理手冊》一致。各機關的慣用寫法歡迎 fork 後客製化。
 
 ## 使用範例
 
@@ -156,9 +166,9 @@ AI 會自動判斷文件類別、確認必要資訊、產出合規文件、執�
 
 - 行政院《文書處理手冊》（112 年 6 月 8 日修正）
 - 《公文程式條例》
-- 國家文官學院《公文撰作解析》（114 年 12 月編印）
+- 國家文官學院《公文撰作解析》（114 年 12 月編印）：[公開版 PDF](https://ws.csptc.gov.tw/001/Upload/ebook/ebook/%E5%85%AC%E6%96%87%E6%92%B0%E4%BD%9C%E8%A7%A3%E6%9E%90/%E5%85%AC%E6%96%87%E6%92%B0%E4%BD%9C%E8%A7%A3%E6%9E%90.pdf)
 - 文書處理相關釋例－函釋（更新至 115.4.30）
-- 文書處理相關釋例－院長電子信箱（更新至 115.6.30）
+- 文書處理相關釋例－院長電子信箱（更新至 115.8.31）
 - 全國法規資料庫《行政程序法》：https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030055
 - 全國法規資料庫《訴願法》：https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030020
 - 國家發展委員會《行政院及所屬各機關處理人民陳情案件要點》：https://theme.ndc.gov.tw/lawout/LawContent.aspx?id=GL000017
