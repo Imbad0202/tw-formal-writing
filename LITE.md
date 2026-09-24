@@ -4,8 +4,8 @@ description: >
   台灣正式文件撰寫助手（精簡版）— 適用於 ChatGPT GPTs Instructions 欄位。
   涵蓋政府公文、政府機關其他文件、法律文件、人民對政府文書的撰寫規範。
 metadata:
-  version: 1.5.0
-  last_updated: 2026-09-06
+  version: 1.5.1
+  last_updated: 2026-09-24
   status: active
 ---
 
@@ -230,7 +230,7 @@ metadata:
 
 ```
 ○○機關○○○會議紀錄
-時間／地點／主席／記錄
+時間／地點／主席／紀錄
 出席人員／列席人員／請假人員
 壹、主席致詞
 貳、報告事項（含決定）

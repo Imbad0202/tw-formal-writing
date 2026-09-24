@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.5.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,9 +36,11 @@
 | 法律文件 | 存證信函、合約書、律師函、備忘錄(MOU)、聲明書、切結書、委託書 |
 | 人民對政府 | 陳情書、申請書、訴願書、異議書 |
 
-## 最新版本亮點（v1.5.0）
+## 最新版本亮點（v1.5.1）
 
-新增 [12組案件場景指引](references/official-scenarios.md)：催辦、展期、補正、否准、陳述意見通知、陳情答復與移轉、原函更正、會辦便簽、會勘、會議後續、箋函、公務電話紀錄。每組提供必要資訊、文別判斷及撰寫重點；單檔版收於附錄六，多檔 skill 依需求選讀。
+v1.5.1：對照目前 Claude 模型照字面遵循指示的特性，盤點並調整規範寫法。公文第一步的資訊確認改為能從描述推知的直接判斷，推知不了且會影響寫法才詢問；另刪去 `SKILL.md` 一行強調說明，並修正三處內容錯誤。公文規範的改動也進入 `STANDALONE.md` 完整單檔與 Codex、Gemini 入口檔，各版本收到哪些改動見 [CHANGELOG](CHANGELOG.md)。各平台都未做模型實測。
+
+v1.5.0：新增 [12組案件場景指引](references/official-scenarios.md)：催辦、展期、補正、否准、陳述意見通知、陳情答復與移轉、原函更正、會辦便簽、會勘、會議後續、箋函、公務電話紀錄。每組提供必要資訊、文別判斷及撰寫重點；單檔版收於附錄六，多檔 skill 依需求選讀。
 
 同時修正先簽後稿的產出順序、會議紀錄與通知單欄位、救濟教示的過度概括，以及舊範例誤判「依據」的問題。新增 [涵蓋度與後續缺口盤點](docs/scenario-coverage.md)、[20題行為檢查規格](docs/scenario-evaluation.md)與[案件後續範例](examples/05-case-follow-up.md)。法規預告、會銜完整流程、採購及資訊公開等仍需專章補強，未列為完整支援。
 
@@ -46,7 +48,7 @@ v1.4.1：修正 v1.4.0 的幾個文件與腳本小瑕疵，包括 README 的更�
 
 v1.4.0：本 repo 同時是一個 Claude Code plugin marketplace，可直接用 `/plugin marketplace add` 安裝（見下方「Claude Code」段），CLI 與桌面版皆適用。同時修正 plugin 模式下讀不到規範內容的問題，並移除 repo 內全部 symlink（Windows clone 會失效）。
 
-前一版（v1.3.0）為規範內容的批次補強：對照《文書處理手冊》112 年版全文與行政院兩份釋例彙編逐條第一方核對，修正三處既有錯誤依據，並補齊惠字用法、數字日期時間金額細則、行款欄位規則、法律統一用字表全表等。詳見 [CHANGELOG](CHANGELOG.md)。
+v1.3.0：規範內容的批次補強，對照《文書處理手冊》112 年版全文與行政院兩份釋例彙編逐條第一方核對，修正三處既有錯誤依據，並補齊惠字用法、數字日期時間金額細則、行款欄位規則、法律統一用字表全表等。詳見 [CHANGELOG](CHANGELOG.md)。
 
 ## 三個版本
 

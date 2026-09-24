@@ -2,7 +2,7 @@ English | **[中文](README.md)**
 
 # Taiwan Official Document Writing AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.5.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,9 +36,11 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | Legal Documents | Certified Letter (存證信函), Contract (合約書), Lawyer's Letter (律師函), MOU (備忘錄), Declaration (聲明書), Affidavit (切結書), Power of Attorney (委託書) |
 | Citizen-to-Government | Petition (陳情書), Application (申請書), Administrative Appeal (訴願書), Objection (異議書) |
 
-## What's New (v1.5.0)
+## What's New (v1.5.1)
 
-Adds [12 case scenarios](references/official-scenarios.md): reminders, extensions, requests for missing documents, application denials, opportunities to state an opinion, petition responses and transfers, corrections, internal consultation, site inspections, meeting follow-up, personal correspondence on official business, and official telephone records. Each covers required context, document selection, and drafting decisions. The single-file edition includes them in Appendix 6; multi-file skills read relevant scenarios as needed.
+v1.5.1: reviews and adjusts the guidance wording against how current Claude models follow instructions literally. Step one of the guidance for government official documents now tells the model to infer what it can from the request and to ask only when a detail cannot be inferred and would change the document; a line of emphasis was removed from `SKILL.md`, and three content errors were fixed. The changes to the official-document guidance also reach the complete single file `STANDALONE.md` and the Codex and Gemini entry files; see the [CHANGELOG](CHANGELOG.md) for what each version receives. None of this has been tested against models on any platform.
+
+v1.5.0: adds [12 case scenarios](references/official-scenarios.md): reminders, extensions, requests for missing documents, application denials, opportunities to state an opinion, petition responses and transfers, corrections, internal consultation, site inspections, meeting follow-up, personal correspondence on official business, and official telephone records. Each covers required context, document selection, and drafting decisions. The single-file edition includes them in Appendix 6; multi-file skills read relevant scenarios as needed.
 
 Also fixes inconsistent instructions for drafting after approval, meeting-record and notice fields, overgeneralized remedies guidance, and an example that incorrectly rejected the citation phrase 依據. See the [coverage audit and remaining gaps](docs/scenario-coverage.md), [20 behavioral evaluation cases](docs/scenario-evaluation.md), and [worked examples](examples/05-case-follow-up.md). Specialized rulemaking, joint issuance, procurement, and information-access workflows still need dedicated guidance.
 
@@ -46,7 +48,7 @@ v1.4.1: fixes a few docs and script rough edges from v1.4.0, including the READM
 
 v1.4.0: this repo is now also a Claude Code plugin marketplace, installable directly via `/plugin marketplace add` (see the Claude Code section below) in both the CLI and the desktop app. This release also fixes the guidance files being unreachable in plugin mode, and removes every symlink from the repo (they break on Windows clones).
 
-The previous release (v1.3.0) was a batch reinforcement of the guidance itself: line-by-line first-party verification against the full text of the Executive Yuan Document Processing Manual (2023 edition) and its two official interpretation compilations, fixing three incorrect existing citations and adding rules on the 惠 particle, numbers/dates/times/amounts, letter-field conventions, the complete Legal Uniform Character Table, and more. See the [CHANGELOG](CHANGELOG.md).
+v1.3.0: a batch reinforcement of the guidance itself, with line-by-line first-party verification against the full text of the Executive Yuan Document Processing Manual (2023 edition) and its two official interpretation compilations, fixing three incorrect existing citations and adding rules on the 惠 particle, numbers/dates/times/amounts, letter-field conventions, the complete Legal Uniform Character Table, and more. See the [CHANGELOG](CHANGELOG.md).
 
 ## Three Versions
 

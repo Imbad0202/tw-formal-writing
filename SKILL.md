@@ -22,8 +22,8 @@ description: >
   - 翻譯任務
   - 純粹的文章潤飾或改寫
 metadata:
-  version: 1.5.0
-  last_updated: 2026-09-06
+  version: 1.5.1
+  last_updated: 2026-09-24
   status: active
 ---
 
@@ -87,8 +87,6 @@ metadata:
 | 4. 人民對政府文書 | `references/civil-petition.md` | 陳情書、申請書、訴願書等格式 |
 
 **案件場景補充**：遇催辦、展期、補正、否准、陳述意見通知、陳情答復／移轉、原函更正、會辦、會勘、會議後續、箋函或公務電話紀錄，再讀 `references/official-scenarios.md` 的索引及對應場景。只讀本案所需內容；「民眾申請展期」走類別4，「機關申請或通知延長」才走機關文書。草稿、已核定與已發文／送達應分清楚。
-
-**讀取 reference file 後，嚴格依照該 file 的指示撰寫。** Reference file 包含該類文件的結構模板、用語規範、格式要求和範例。
 
 ## 外國使用者適應（Foreigner Adaptation）
 
