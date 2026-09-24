@@ -4,11 +4,13 @@
 
 ## [1.5.1] - 2026-09-24
 
-盤點 skill 內給模型的指示文字，對照目前 Claude 模型照字面遵循指示的特性，改寫公文第一步要求逐項詢問的確認寫法，刪去一行重複的強調說明，並修正三處內容錯誤。這些調整未做模型實測。公文規範（`references/official-letter.md`）的改動進入單檔版（`STANDALONE.md`、`AGENTS.md`、`GEMINI.md`）、plugin 複本與 skill.zip，未同步到 LITE 版；`SKILL.md` 刪去的那一行與範例的改動進入 plugin 複本與 skill.zip，不進單檔版；LITE 版只改會議紀錄欄位用字。
+對照目前 Claude 模型照字面遵循指示的特性，盤點 skill 內給模型的指示文字：改寫公文第一步要求逐項詢問的確認寫法，刪去 `SKILL.md` 一行強調說明，並修正三處內容錯誤。以上改動都未做模型實測。
+
+各版本收到的改動：`SKILL.md` + `references/` 多檔案版、Claude Code plugin 與 `skill.zip` 收到 `references/`、`SKILL.md` 與範例的改動；`STANDALONE.md` 完整單檔及內容相同的 `AGENTS.md`、`GEMINI.md` 只收到 `references/` 的規範改動；`LITE.md` 只改會議紀錄欄位用字。
 
 ### Changed
-- **資訊確認改為能推知就不問**（`references/official-letter.md` 第一步）：原寫「先確認以下資訊（如使用者未提供，主動詢問）」，照字面執行會連能從描述推知的資訊也逐項詢問。改為行文方向依發文機關與受文者的隸屬關係判斷、簽辦方式依「簽辦方式選用」並參照「常見場景快速辨識」表判斷，推知不了且會影響寫法的才詢問；隸屬關係不明，或雙方只有補助、監督關係時要先問。此改法不依賴特定模型，主要是消除與範例一、場景表的不一致，因此一併進入單檔版。
-- **`SKILL.md` 刪去重複的強調句**：「讀取 reference file 後，嚴格依照該 file 的指示撰寫」與上方「讀取對應的 reference file 並依其規範撰寫」重複，隨後說明 reference file 內容的一句也一併刪去。單檔版開頭的同一行（`references/_header.md`）暫不刪：強調語氣對 ChatGPT、Gemini、Codex 可能仍有作用，待實測後再決定。
+- **資訊確認改為能推知就不問**（`references/official-letter.md` 第一步）：原寫「先確認以下資訊（如使用者未提供，主動詢問）」，照字面執行會連能從描述推知的資訊也逐項詢問，也與範例一（`examples/01-official-letter.md`）及「常見場景快速辨識」表直接推知的做法不一致。改為行文方向依發文機關與受文者的隸屬關係判斷、簽辦方式依「簽辦方式選用」並參照「常見場景快速辨識」表判斷，推知不了且會影響寫法的才詢問；隸屬關係不明，或雙方只有補助、監督關係時要先問。
+- **`SKILL.md` 刪去一行強調說明**：首句「讀取 reference file 後，嚴格依照該 file 的指示撰寫」與上方「讀取對應的 reference file 並依其規範撰寫」重複，次句說明 reference file 的內容。完整單檔開頭用的是另一份對應的句子（`references/_header.md`「參閱對應章節後，嚴格依照該章節的指示撰寫」），這次不動：完整單檔同時供 claude.ai Projects 與 ChatGPT、Gemini、Codex 使用，強調語氣對部分平台可能仍有作用，待實測後再決定。
 - 範例四與維護說明（`CLAUDE.md`）各刪去一則版本沿革註記。
 
 ### Fixed
