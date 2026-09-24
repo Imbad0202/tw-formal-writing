@@ -40,7 +40,7 @@ dist/*.zip                ← claude.ai / cowork 上傳用打包（gitignore，�
 各版本的分工：
 - **SKILL.md**：執行期由 Claude Code 讀取，再依判斷結果動態 `Read` 對應的 `references/*.md`。SKILL.md 本身只有類別判斷邏輯與載入指引，**規範內容不在 SKILL.md 裡**。
 - **STANDALONE.md**：`_header.md` + 6 個 reference 檔組裝而成的單檔（各 reference 的 H1 降級為「附錄一～六」，跨檔指涉改寫為附錄指涉，見 `build.py` 的 `APPENDICES` 與 `CROSS_REF_FIXES`）。
-- **`skills/tw-formal-writing/`**：Claude Code plugin 的 skill 目錄。官方規格要求 SKILL.md 與它引用的 `references/`、`examples/` 同層（相對路徑相對 skill 目錄解析），而 SSOT 在 repo 根目錄，故此處放實體複本。v1.4.0 前這裡只有一個 SKILL.md symlink、沒有 references/，plugin 模式下規範全數讀取失敗。
+- **`skills/tw-formal-writing/`**：Claude Code plugin 的 skill 目錄。官方規格要求 SKILL.md 與它引用的 `references/`、`examples/` 同層（相對路徑相對 skill 目錄解析），而 SSOT 在 repo 根目錄，故此處放實體複本；少了這些複本，plugin 模式下讀不到任何規範。
 - **`AGENTS.md` / `GEMINI.md`**：Codex / Gemini CLI 的自動讀取入口，內容即 STANDALONE.md。
 
 > **為什麼三項生成產物都用實體複本、不用 symlink**：這個 repo 的散布方式全部是 `git clone`（plugin 安裝、手動 clone 給 CLI 用）。Windows 的 git 預設 `core.symlinks=false`，會把 symlink 還原成一行純文字路徑，agent 讀到的就不是規範。代價是同一份內容在 repo 內有多份複本、diff 較大，由 `build.py --check` 保證不漂移，**任何一份都不要手改**。

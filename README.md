@@ -2,7 +2,7 @@
 
 # 台灣正式文件撰寫 AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.5.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,9 +36,11 @@
 | 法律文件 | 存證信函、合約書、律師函、備忘錄(MOU)、聲明書、切結書、委託書 |
 | 人民對政府 | 陳情書、申請書、訴願書、異議書 |
 
-## 最新版本亮點（v1.5.0）
+## 最新版本亮點（v1.5.1）
 
-新增 [12組案件場景指引](references/official-scenarios.md)：催辦、展期、補正、否准、陳述意見通知、陳情答復與移轉、原函更正、會辦便簽、會勘、會議後續、箋函、公務電話紀錄。每組提供必要資訊、文別判斷及撰寫重點；單檔版收於附錄六，多檔 skill 依需求選讀。
+v1.5.1：依目前 Claude 模型照字面遵循指示的特性調整規範寫法。公文的資訊確認改為能從描述推知的直接判斷，推知不了才詢問；刪去重複的強調句與檢核步驟（檢核項目沒有減少），並修正三處內容錯誤。尚未做模型實測，詳見 [CHANGELOG](CHANGELOG.md)。
+
+v1.5.0：新增 [12組案件場景指引](references/official-scenarios.md)：催辦、展期、補正、否准、陳述意見通知、陳情答復與移轉、原函更正、會辦便簽、會勘、會議後續、箋函、公務電話紀錄。每組提供必要資訊、文別判斷及撰寫重點；單檔版收於附錄六，多檔 skill 依需求選讀。
 
 同時修正先簽後稿的產出順序、會議紀錄與通知單欄位、救濟教示的過度概括，以及舊範例誤判「依據」的問題。新增 [涵蓋度與後續缺口盤點](docs/scenario-coverage.md)、[20題行為檢查規格](docs/scenario-evaluation.md)與[案件後續範例](examples/05-case-follow-up.md)。法規預告、會銜完整流程、採購及資訊公開等仍需專章補強，未列為完整支援。
 

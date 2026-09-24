@@ -2,7 +2,7 @@ English | **[中文](README.md)**
 
 # Taiwan Official Document Writing AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.5.0-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,9 +36,11 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | Legal Documents | Certified Letter (存證信函), Contract (合約書), Lawyer's Letter (律師函), MOU (備忘錄), Declaration (聲明書), Affidavit (切結書), Power of Attorney (委託書) |
 | Citizen-to-Government | Petition (陳情書), Application (申請書), Administrative Appeal (訴願書), Objection (異議書) |
 
-## What's New (v1.5.0)
+## What's New (v1.5.1)
 
-Adds [12 case scenarios](references/official-scenarios.md): reminders, extensions, requests for missing documents, application denials, opportunities to state an opinion, petition responses and transfers, corrections, internal consultation, site inspections, meeting follow-up, personal correspondence on official business, and official telephone records. Each covers required context, document selection, and drafting decisions. The single-file edition includes them in Appendix 6; multi-file skills read relevant scenarios as needed.
+v1.5.1: adjusts the guidance wording for current Claude models, which follow instructions literally. Official-letter drafting now infers what it can from the request and asks only about details it cannot infer; duplicated emphasis and a duplicated checklist procedure were removed (no check was dropped), and three content errors were fixed. Not yet tested against models; see the [CHANGELOG](CHANGELOG.md).
+
+v1.5.0: adds [12 case scenarios](references/official-scenarios.md): reminders, extensions, requests for missing documents, application denials, opportunities to state an opinion, petition responses and transfers, corrections, internal consultation, site inspections, meeting follow-up, personal correspondence on official business, and official telephone records. Each covers required context, document selection, and drafting decisions. The single-file edition includes them in Appendix 6; multi-file skills read relevant scenarios as needed.
 
 Also fixes inconsistent instructions for drafting after approval, meeting-record and notice fields, overgeneralized remedies guidance, and an example that incorrectly rejected the citation phrase 依據. See the [coverage audit and remaining gaps](docs/scenario-coverage.md), [20 behavioral evaluation cases](docs/scenario-evaluation.md), and [worked examples](examples/05-case-follow-up.md). Specialized rulemaking, joint issuance, procurement, and information-access workflows still need dedicated guidance.
 
