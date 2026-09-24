@@ -38,7 +38,7 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 
 ## What's New (v1.5.1)
 
-v1.5.1: adjusts the guidance wording for current Claude models, which follow instructions literally. Official-letter drafting now infers what it can from the request and asks only about details it cannot infer; duplicated emphasis and a duplicated checklist procedure were removed (no check was dropped), and three content errors were fixed. Not yet tested against models; see the [CHANGELOG](CHANGELOG.md).
+v1.5.1: adjusts the guidance wording for current Claude models, which follow instructions literally. In step one of official-letter drafting, the model now infers what it can from the request and asks only when a detail cannot be inferred and would change the letter; one duplicated emphasis line was removed, and three content errors were fixed. The full single-file edition and the Codex and Gemini entry files carry the same changes; none of this has been tested against models on any platform. See the [CHANGELOG](CHANGELOG.md).
 
 v1.5.0: adds [12 case scenarios](references/official-scenarios.md): reminders, extensions, requests for missing documents, application denials, opportunities to state an opinion, petition responses and transfers, corrections, internal consultation, site inspections, meeting follow-up, personal correspondence on official business, and official telephone records. Each covers required context, document selection, and drafting decisions. The single-file edition includes them in Appendix 6; multi-file skills read relevant scenarios as needed.
 
@@ -48,7 +48,7 @@ v1.4.1: fixes a few docs and script rough edges from v1.4.0, including the READM
 
 v1.4.0: this repo is now also a Claude Code plugin marketplace, installable directly via `/plugin marketplace add` (see the Claude Code section below) in both the CLI and the desktop app. This release also fixes the guidance files being unreachable in plugin mode, and removes every symlink from the repo (they break on Windows clones).
 
-The previous release (v1.3.0) was a batch reinforcement of the guidance itself: line-by-line first-party verification against the full text of the Executive Yuan Document Processing Manual (2023 edition) and its two official interpretation compilations, fixing three incorrect existing citations and adding rules on the 惠 particle, numbers/dates/times/amounts, letter-field conventions, the complete Legal Uniform Character Table, and more. See the [CHANGELOG](CHANGELOG.md).
+v1.3.0: a batch reinforcement of the guidance itself, with line-by-line first-party verification against the full text of the Executive Yuan Document Processing Manual (2023 edition) and its two official interpretation compilations, fixing three incorrect existing citations and adding rules on the 惠 particle, numbers/dates/times/amounts, letter-field conventions, the complete Legal Uniform Character Table, and more. See the [CHANGELOG](CHANGELOG.md).
 
 ## Three Versions
 
