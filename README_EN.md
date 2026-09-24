@@ -2,7 +2,7 @@ English | **[中文](README.md)**
 
 # Taiwan Official Document Writing AI Skill
 
-[![Version](https://img.shields.io/badge/version-v1.5.1-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
+[![Version](https://img.shields.io/badge/version-v1.5.2-blue)](https://github.com/Imbad0202/tw-formal-writing/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-Buy%20Me%20a%20Coffee-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/crucify020v)
 
@@ -36,7 +36,9 @@ In Taiwan, official documents follow strict rules governed by the *Official Docu
 | Legal Documents | Certified Letter (存證信函), Contract (合約書), Lawyer's Letter (律師函), MOU (備忘錄), Declaration (聲明書), Affidavit (切結書), Power of Attorney (委託書) |
 | Citizen-to-Government | Petition (陳情書), Application (申請書), Administrative Appeal (訴願書), Objection (異議書) |
 
-## What's New (v1.5.1)
+## What's New (v1.5.2)
+
+v1.5.2: checks the guidance item by item against the Document Processing Handbook, the Executive Yuan's two interpretation compilations, and the National Academy of Civil Service textbook 公文撰作解析 (December 2025 edition), and corrects content that misread or misquoted its source or had no source at all, such as "an upward letter must not have a third section", "write only the lowest-level unit in 簽於何處", and "no English in a Chinese letter". Several ruling dates and an appendix number are also corrected. Conventions found only in the textbook and not required by the Handbook (such as the direction of 奉/准/據, not naming the third section of an upward letter 辦法, and leaving the closing request phrase out of a public notice) are now flagged as warnings instead of errors, and a warning now means the model points out the issue and its source and lets the user decide; where the rulings and the textbook disagree, both are shown. Approval, rejection, and request phrases grouped by recipient, and the term 抄發, are added from the textbook. See the [CHANGELOG](CHANGELOG.md) for what each version receives. None of this has been tested against models on any platform.
 
 v1.5.1: reviews and adjusts the guidance wording against how current Claude models follow instructions literally. Step one of the guidance for government official documents now tells the model to infer what it can from the request and to ask only when a detail cannot be inferred and would change the document; a line of emphasis was removed from `SKILL.md`, and three content errors were fixed. The changes to the official-document guidance also reach the complete single file `STANDALONE.md` and the Codex and Gemini entry files; see the [CHANGELOG](CHANGELOG.md) for what each version receives. None of this has been tested against models on any platform.
 
@@ -130,6 +132,12 @@ git clone https://github.com/Imbad0202/tw-formal-writing.git
 ```
 After cloning, it works in your working directory: `AGENTS.md` (Codex, etc.) and `GEMINI.md` (Gemini CLI) at the repo root both carry the full single-file `STANDALONE.md` content, which the agent reads automatically.
 
+By default Codex auto-loads at most 32 KiB of `AGENTS.md`. The full single file is over 100 KiB, so only the first part of the official-document guidance is loaded (up to around the honorifics section); the request phrases, the quality checklist, and the other document categories are not loaded automatically. To have Codex load the full guidance, add this line near the top of `~/.codex/config.toml`, before any `[section]` header (placed after a header, it belongs to that section and has no effect), or pass `-c project_doc_max_bytes=262144` when you run Codex:
+
+```toml
+project_doc_max_bytes = 262144
+```
+
 ### Gemini Gems
 
 1. Go to [Gemini](https://gemini.google.com) → Gems → Create a new Gem
@@ -138,6 +146,8 @@ After cloning, it works in your working directory: `AGENTS.md` (Codex, etc.) and
 ## Important Notice
 
 > **Per the [Executive Yuan Guidelines on Generative AI Use by Government Agencies](https://www.ey.gov.tw/Page/448DE008087A1971/40c1a925-121d-4b6b-8f40-7e9e1a5401f2), classified documents must be written by the responsible officer and may not be produced using generative AI. Do not input classified information, non-public restricted information, or unnecessary personal data into this tool. For citizen-to-government documents, provide only the minimum identifying and contact details required for that procedure; avoid national ID numbers, ID-card scans, or similar high-sensitivity data unless a law, agency form, or workflow explicitly requires them.**
+
+This skill offers general guidance, not a standard answer or the only acceptable wording; its position follows the Document Processing Handbook. For agency-specific conventions, you are welcome to fork the repo and customize it.
 
 ## Example Prompts
 
@@ -161,15 +171,15 @@ If you're a foreigner living or working in Taiwan and need to write formal docum
 - **Filing an administrative appeal** (訴願) against a government decision
 - **Writing a formal application** (申請書) for various government services
 
-The AI communicates with you in English but generates the formal document in Traditional Chinese, as required by Taiwanese regulations. It can also provide a separate paragraph-by-paragraph English explanation so you understand what you're submitting, but that explanation should stay separate from the filing version.
+The AI communicates with you in English but generates the formal document in Traditional Chinese, the language Taiwanese official documents are written in. It can also provide a separate paragraph-by-paragraph English explanation so you understand what you're submitting, but that explanation should stay separate from the filing version.
 
 ## Regulatory Basis
 
 - Executive Yuan "Document Processing Handbook" (文書處理手冊, revised June 8, 2023)
 - "Official Document Format Act" (公文程式條例)
-- National Academy of Civil Service "Official Document Writing Guide" (公文撰作解析, December 2025 edition)
+- National Academy of Civil Service "Official Document Writing Guide" (公文撰作解析, December 2025 edition): [public PDF](https://ws.csptc.gov.tw/001/Upload/ebook/ebook/%E5%85%AC%E6%96%87%E6%92%B0%E4%BD%9C%E8%A7%A3%E6%9E%90/%E5%85%AC%E6%96%87%E6%92%B0%E4%BD%9C%E8%A7%A3%E6%9E%90.pdf)
 - Official interpretations and rulings — Letters of Interpretation (文書處理相關釋例－函釋, updated to April 30, 2026)
-- Official interpretations and rulings — Premier's Mailbox (文書處理相關釋例－院長電子信箱, updated to June 30, 2026)
+- Official interpretations and rulings — Premier's Mailbox (文書處理相關釋例－院長電子信箱, updated to August 31, 2026)
 - Administrative Procedure Act (official text): https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030055
 - Administrative Appeal Act (official text): https://law.moj.gov.tw/LawClass/LawAll.aspx?media=print&pcode=A0030020
 - Directions for Handling Public Petitions by Executive Yuan Agencies: https://theme.ndc.gov.tw/lawout/LawContent.aspx?id=GL000017
